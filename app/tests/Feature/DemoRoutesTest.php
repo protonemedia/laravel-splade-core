@@ -10,6 +10,7 @@ class DemoRoutesTest extends TestCase
     {
         return [
             ['/anonymous'],
+            ['/base-view'],
             ['/blade-method-callbacks'],
             ['/blade-method'],
             ['/change-blade-prop'],
@@ -17,20 +18,20 @@ class DemoRoutesTest extends TestCase
             ['/form'],
             ['/refresh-state'],
             ['/refresh'],
-            ['/two-way-binding'],
-            ['/base-view'],
             ['/regular-view'],
+            ['/two-way-binding'],
         ];
     }
 
     /**
      * @test
      *
+     * @runInSeparateProcess
+     *
      * @dataProvider demoRoutes
      */
     public function it_renders_all_demo_routes($route)
     {
-        $this->get($route)
-            ->assertOk();
+        $this->get($route)->assertOk();
     }
 }

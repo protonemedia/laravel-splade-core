@@ -61,6 +61,6 @@ class CompilerEngine extends BaseCompilerEngine
 
         app('view')->pushSpladeTemplate($hash, $result);
 
-        return $service->getPendingView()->render($hash);
+        return $service->getViewAsVueRenderer()->render($hash);
     }
 }

@@ -11,21 +11,36 @@ use ProtoneMedia\SpladeCore\AddSpladeToComponentData;
 
 class Factory extends BaseFactory
 {
+    /**
+     * Whether to track Splade components.
+     */
     protected static bool $trackSpladeComponents = false;
 
+    /**
+     * The tracked Splade components.
+     */
     protected static array $spladeComponents = [];
 
+    /**
+     * Enable tracking of Splade components.
+     */
     public static function trackSpladeComponents(): void
     {
         static::$trackSpladeComponents = true;
         static::clearSpladeComponents();
     }
 
+    /**
+     * Clear the tracked Splade components.
+     */
     public static function clearSpladeComponents(): void
     {
         static::$spladeComponents = [];
     }
 
+    /**
+     * Get the tracked Splade components.
+     */
     public static function getSpladeComponent(string $key): ?string
     {
         return static::$spladeComponents[$key] ?? null;
@@ -50,7 +65,10 @@ class Factory extends BaseFactory
         return parent::startComponent($view, $data);
     }
 
-    protected function prepareSpladeTemplatesStack()
+    /**
+     * Initialize the stack for the Splade templates once.
+     */
+    protected function prepareSpladeTemplatesStack(): void
     {
         if ($this->hasRenderedOnce('splade-templates')) {
             return;
@@ -60,7 +78,10 @@ class Factory extends BaseFactory
         $this->extendPush('splade-templates', 'const spladeTemplates = {};');
     }
 
-    public function pushSpladeTemplate($id, $value)
+    /**
+     * Pushes a Splade template to the stack.
+     */
+    public function pushSpladeTemplate($id, $value): void
     {
         $this->prepareSpladeTemplatesStack();
 
@@ -72,6 +93,13 @@ class Factory extends BaseFactory
         );
     }
 
+    /**
+     * Temporarily store the passed attributes, render the component and
+     * push it to the Splade templates stack. Then return a generic Vue
+     * component that will grab the template from the stack.
+     *
+     * @return string
+     */
     public function renderComponent()
     {
         /** @var array */

@@ -46,11 +46,14 @@ class BladeViewExtractor
             && Str::contains($this->bladePath, '/components/');
     }
 
-    public function getPendingView(): PendingView
+    /**
+     * Returns a RenderViewAsVueComponent instance for the view.
+     */
+    public function getViewAsVueRenderer(): RenderViewAsVueComponent
     {
         $this->splitOriginalView();
 
-        return PendingView::from($this->viewWithoutScriptTag, $this->bladePath, $this->viewRootLayoutTags);
+        return RenderViewAsVueComponent::from($this->viewWithoutScriptTag, $this->bladePath, $this->viewRootLayoutTags);
     }
 
     /**

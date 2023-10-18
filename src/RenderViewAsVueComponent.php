@@ -5,7 +5,7 @@ namespace ProtoneMedia\SpladeCore;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 
-class PendingView
+class RenderViewAsVueComponent
 {
     public function __construct(
         public readonly string $viewWithoutScript,

@@ -12,19 +12,16 @@ class BladeCompiler extends BaseBladeCompiler
      */
     protected array $data = [];
 
-    public array $hashes = [];
-
-    public array $pendingViews = [];
-
     /**
      * Extract the Vue script from the given template.
      */
     public function compileString($value): string
     {
-        $result = BladeViewExtractor::from($value, $this->data, $this->getPath())
-            ->handle($this->files);
+        $value = BladeViewExtractor::from(
+            $value, $this->data, $this->getPath()
+        )->handle($this->files);
 
-        return parent::compileString($result);
+        return parent::compileString($value);
     }
 
     /**

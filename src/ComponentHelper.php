@@ -51,12 +51,12 @@ class ComponentHelper
         if (Str::contains($component, 'components.')) {
             // Anonymous component
             $filename = Str::of($component)
-                ->replace('.', DIRECTORY_SEPARATOR)
+                ->replace('.', '/')
                 ->append('.blade.php');
 
             foreach ($this->getViewPaths() as $path) {
-                if ($this->filesystem->exists($path.DIRECTORY_SEPARATOR.$filename)) {
-                    return $path.DIRECTORY_SEPARATOR.$filename;
+                if ($this->filesystem->exists($path.'/'.$filename)) {
+                    return $path.'/'.$filename;
                 }
             }
         }
@@ -106,6 +106,8 @@ class ComponentHelper
 
             return Str::after($fullPath, $path);
         }
+
+        return null;
     }
 
     /**

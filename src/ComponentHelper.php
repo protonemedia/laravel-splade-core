@@ -76,10 +76,12 @@ class ComponentHelper
         $class = $this->getClass($component);
 
         if (! $class) {
+            $isComponent = $component instanceof Component || Str::contains($component, 'components.');
+
             return Str::of($this->getAlias($component))
                 ->replace('.', ' ')
                 ->studly()
-                ->prepend('SpladeComponent')
+                ->prepend($isComponent ? 'SpladeComponent' : 'Splade')
                 ->toString();
         }
 

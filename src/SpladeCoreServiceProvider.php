@@ -103,10 +103,6 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
                 $blade->component('dynamic-component', DynamicComponent::class);
             });
         });
-
-        BladeCompiler::beforeCompilingString(
-            fn ($value, $data, $path) => ExtractVueScriptFromBladeView::from($value, $data, $path)->handle(app('files'))
-        );
     }
 
     protected function registerFactory()

@@ -67,6 +67,28 @@ class Factory extends BaseFactory
         return parent::startComponent($view, $data);
     }
 
+    protected function prepareSpladeTemplatesStack()
+    {
+        if ($this->hasRenderedOnce('splade-templates')) {
+            return;
+        }
+
+        $this->markAsRenderedOnce('splade-templates');
+        $this->extendPush('splade-templates', 'const spladeTemplates = {};');
+    }
+
+    public function pushSpladeTemplate($id, $value)
+    {
+        $this->prepareSpladeTemplatesStack();
+
+        $value = Js::from($value)->toHtml();
+
+        $this->extendPush(
+            'splade-templates',
+            "spladeTemplates['{$id}'] = {$value};"
+        );
+    }
+
     public function renderComponent()
     {
         /** @var array */
@@ -88,17 +110,7 @@ class Factory extends BaseFactory
             static::$spladeComponents[$templateId] = $output;
         }
 
-        if (! $this->hasRenderedOnce('splade-templates')) {
-            $this->markAsRenderedOnce('splade-templates');
-            $this->extendPush('splade-templates', 'const spladeTemplates = {};');
-        }
-
-        $template = Js::from($output)->toHtml();
-
-        $this->extendPush(
-            'splade-templates',
-            "spladeTemplates['{$templateId}'] = {$template};"
-        );
+        $this->pushSpladeTemplate($templateId, $output);
 
         $spladeBridge = Js::from($componentData['spladeBridge'])->toHtml();
 

@@ -2,7 +2,9 @@
 
 namespace ProtoneMedia\SpladeCore\View;
 
+use Illuminate\Support\Str;
 use Illuminate\View\Compilers\BladeCompiler as BaseBladeCompiler;
+use ProtoneMedia\SpladeCore\ExtractVueScriptFromBladeView;
 
 class BladeCompiler extends BaseBladeCompiler
 {
@@ -11,30 +13,34 @@ class BladeCompiler extends BaseBladeCompiler
      */
     protected array $data = [];
 
-    /**
-     * Callbacks that are called before compiling the string.
-     */
-    protected static array $beforeCompilingStringCallbacks = [];
+    public array $hashes = [];
 
-    /**
-     * Registers a callback that is called before compiling the string.
-     */
-    public static function beforeCompilingString(callable $callback): void
-    {
-        static::$beforeCompilingStringCallbacks[] = $callback;
-    }
+    public array $pendingViews = [];
 
     /**
      * Extract the Vue script from the given template.
      */
     public function compileString($value): string
     {
-        foreach (static::$beforeCompilingStringCallbacks as $callback) {
-            $callback = $callback->bindTo($this, static::class);
-            $value = $callback($value, $this->data, $this->getPath());
+        $service = ExtractVueScriptFromBladeView::from($value, $this->data, $this->getPath());
+
+        $result = $service->handle($this->files);
+
+        if (is_string($result)) {
+            return parent::compileString($result);
         }
 
-        return parent::compileString($value);
+        // TODO: move to CompilerEngine::get()
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 9);
+
+        // prevent leaking the full path
+        $path = Str::after($trace[8]['file'], base_path());
+
+        $hash = md5($path.'.'.$trace[8]['line']);
+
+        $this->pendingViews[$hash] = $result->setOriginalView($value);
+
+        return parent::compileString($result->viewWithoutScript);
     }
 
     /**

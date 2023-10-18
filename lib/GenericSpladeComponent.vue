@@ -5,7 +5,7 @@ const props = defineProps({
     bridge: {
         type: Object,
         required: true,
-    }
+    },
 });
 
 const template = ref(`<${props.bridge.tag}></${props.bridge.tag}>`);

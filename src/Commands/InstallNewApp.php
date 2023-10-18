@@ -35,6 +35,7 @@ class InstallNewApp extends Command
         }, $filesystem);
 
         $stubs = [
+            'app.js' => resource_path('js/app.js'),
             'vite.config.js' => base_path('vite.config.js'),
             'demo.blade.php' => resource_path('views/components/demo.blade.php'),
             'layout.blade.php' => resource_path('views/components/layout.blade.php'),

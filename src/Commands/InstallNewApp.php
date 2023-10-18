@@ -28,7 +28,7 @@ class InstallNewApp extends Command
                 '@protonemedia/laravel-splade-vite' => '^1.0.3',
                 '@vitejs/plugin-vue' => '^4.4.0',
                 'axios' => '^1.1.2',
-                'laravel-vite-plugin' => '^0.8.5',
+                'laravel-vite-plugin' => '^0.8.0',
                 'vite' => '^4.0.0',
                 'vue' => '^3.3.4',
             ] + $packages;
@@ -42,11 +42,11 @@ class InstallNewApp extends Command
         ];
 
         foreach ($stubs as $stub => $destination) {
-            $filesystem->put(__DIR__.'/../../stubs/'.$stub, $destination);
+            $filesystem->copy(__DIR__.'/../../stubs/'.$stub, $destination);
         }
 
         $this->comment('All done');
-        $this->comment('Execute "npm run dev" to start the Vite dev server.');
+        $this->comment('Execute "npm install" and "npm run dev" to start the Vite dev server.');
 
         return static::SUCCESS;
     }
@@ -76,5 +76,13 @@ class InstallNewApp extends Command
             $packageJsonFile,
             json_encode($packages, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT).static::eol()
         );
+    }
+
+    /**
+     * End of line symbol.
+     */
+    public static function eol(): string
+    {
+        return windows_os() ? "\n" : PHP_EOL;
     }
 }

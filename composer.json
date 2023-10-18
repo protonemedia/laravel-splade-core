@@ -1,0 +1,55 @@
+{
+    "name": "protonemedia/splade-core",
+    "description": "Splade Core: Use <script setup> and all of Vue 3's magic in your Laravel Blade Components.",
+    "keywords": [
+        "protonemedia",
+        "laravel",
+        "laravel-splade"
+    ],
+    "homepage": "https://github.com/protonemedia/laravel-splade-core",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "pascalbaljet",
+            "email": "pascal@protone.media",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/contracts": "^10.0",
+        "mck89/peast": "^1.15",
+        "spatie/laravel-package-tools": "^1.14.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ProtoneMedia\\SpladeCore\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ProtoneMedia\\SpladeCore\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ProtoneMedia\\SpladeCore\\SpladeCoreServiceProvider"
+            ],
+            "aliases": {
+                "SpladeCore": "ProtoneMedia\\SpladeCore\\Facades\\SpladeCore"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

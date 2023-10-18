@@ -1,0 +1,67 @@
+<?php
+
+namespace ProtoneMedia\SpladeCore\Commands;
+
+use Illuminate\Console\Command;
+use ProtoneMedia\SpladeCore\ComponentHelper;
+use ProtoneMedia\SpladeCore\ComponentSerializer;
+use ProtoneMedia\SpladeCore\ExtractVueScriptFromBladeView;
+use Symfony\Component\Finder\SplFileInfo;
+
+class BuildComponents extends Command
+{
+    public $signature = 'splade:core:build-components {--unprocessed}';
+
+    public $description = 'Builds all Blade Components with Splade Core';
+
+    public function handle(ComponentHelper $componentHelper): int
+    {
+        $filesystem = $componentHelper->filesystem;
+
+        $this->call(ClearComponents::class);
+
+        $this->newLine();
+
+        if ($this->option('unprocessed')) {
+            config(['splade-core.prettify_compiled_scripts' => false]);
+        }
+
+        foreach (config('view.paths') as $path) {
+            $this->info("Searching for components in {$path}");
+
+            $files = $filesystem->allFiles($path);
+
+            // sort by length so that the longest path is first
+            usort($files, fn ($a, $b) => strlen($a) <=> strlen($b));
+
+            foreach ($files as $view) {
+                /** @var SplFileInfo $view */
+                $viewPath = (string) $view;
+
+                if (! str_ends_with($viewPath, '.blade.php')) {
+                    continue;
+                }
+
+                $contents = $filesystem->get($viewPath);
+
+                if (! str_starts_with($contents, '<script setup>')) {
+                    continue;
+                }
+
+                $this->info("Compiling {$viewPath}");
+
+                $componentClass = $componentHelper->getClass($viewPath);
+
+                ExtractVueScriptFromBladeView::from($contents, ['spladeBridge' => [
+                    'data' => $componentClass ? ComponentSerializer::getDataFromComponentClass($componentClass) : [],
+                    'tag' => $componentHelper->getTag($viewPath),
+                    'functions' => $componentClass ? ComponentSerializer::getFunctionsFromComponentClass($componentClass) : [],
+                ]], $path)->handle($filesystem);
+            }
+        }
+
+        $this->comment('Done!');
+
+        return self::SUCCESS;
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "[php]": {
+        "editor.defaultFormatter": "open-southeners.laravel-pint"
+    },
+    "namespaceResolver.sortAlphabetically": true,
+}

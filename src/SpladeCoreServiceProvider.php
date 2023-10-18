@@ -15,6 +15,7 @@ use Illuminate\View\Engines\EngineResolver;
 use ProtoneMedia\SpladeCore\Commands\BuildComponents;
 use ProtoneMedia\SpladeCore\Commands\ClearComponents;
 use ProtoneMedia\SpladeCore\Commands\InitializeComponentsDirectory;
+use ProtoneMedia\SpladeCore\Commands\InstallNewApp;
 use ProtoneMedia\SpladeCore\Http\InvokeComponentController;
 use ProtoneMedia\SpladeCore\View\BladeCompiler;
 use ProtoneMedia\SpladeCore\View\CompilerEngine;
@@ -31,7 +32,8 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
             ->hasConfigFile()
             ->hasCommand(BuildComponents::class)
             ->hasCommand(ClearComponents::class)
-            ->hasCommand(InitializeComponentsDirectory::class);
+            ->hasCommand(InitializeComponentsDirectory::class)
+            ->hasCommand(InstallNewApp::class);
     }
 
     public function packageRegistered()

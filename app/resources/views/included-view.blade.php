@@ -3,7 +3,7 @@
 </script>
 
 <div style="padding: 10px; background: #eee;">
-    <input v-model="message" />
+    <input name="included-message" v-model="message" />
     <p>The message is: <span v-html="message"></span></p>
 
     <x-two-way-binding />

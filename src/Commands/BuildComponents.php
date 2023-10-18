@@ -12,7 +12,7 @@ class BuildComponents extends Command
 {
     public $signature = 'splade:core:build-components {--unprocessed}';
 
-    public $description = 'Builds all Blade Components with Splade Core';
+    public $description = 'Builds all Vue Components with Splade Core';
 
     public function handle(ComponentHelper $componentHelper): int
     {

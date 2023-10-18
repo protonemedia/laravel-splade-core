@@ -349,7 +349,7 @@ Just like with Blade Components, you may use a `<script setup>` tag at the top o
 
     <input v-model="message" />
 </x-layout>
-```blade
+```
 
 ## Changelog
 

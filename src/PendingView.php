@@ -3,7 +3,7 @@
 namespace ProtoneMedia\SpladeCore;
 
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Js;
+use Illuminate\Support\Str;
 
 class PendingView
 {
@@ -14,7 +14,6 @@ class PendingView
         public readonly string $tag,
         public readonly array $rootLayoutTags
     ) {
-
     }
 
     public function setOriginalView(string $originalView): self
@@ -26,17 +25,17 @@ class PendingView
 
     public function render(string $hash): string
     {
-        $bridge = Js::from(['tag' => $this->tag, 'template_hash' => $hash])->toHtml();
+        $tag = Str::kebab($this->tag);
+
+        $component = "<{$tag} splade-template-id=\"{$hash}\"></{$tag}>";
 
         if (empty($this->rootLayoutTags)) {
-            return Blade::render(<<<HTML
-<generic-splade-component :bridge="{$bridge}"></generic-splade-component>
-HTML);
+            return $component;
         }
 
         return Blade::render(<<<HTML
 {$this->rootLayoutTags[0]}
-<generic-splade-component :bridge="{$bridge}"></generic-splade-component>
+$component
 {$this->rootLayoutTags[1]}
 HTML);
     }

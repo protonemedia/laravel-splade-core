@@ -7,8 +7,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Js;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class ExtractVueScriptFromBladeView
 {
@@ -25,6 +25,9 @@ class ExtractVueScriptFromBladeView
         protected readonly array $data,
         protected readonly string $bladePath
     ) {
+        if (! Str::endsWith($bladePath, '.blade.php')) {
+            throw new InvalidArgumentException("The Blade Path must end with '.blade.php'.");
+        }
     }
 
     /**
@@ -47,7 +50,7 @@ class ExtractVueScriptFromBladeView
     /**
      * Check if the view has a <script setup> tag.
      */
-    protected function hasScriptSetup(): bool
+    public function hasScriptSetup(): bool
     {
         return str_contains($this->originalView, '<script setup>');
     }
@@ -78,6 +81,13 @@ class ExtractVueScriptFromBladeView
             $matches[1][0], // <x-layout {{ $attributes }}>
             $matches[3][0], // </x-layout>
         ];
+    }
+
+    public function getPendingView(): PendingView
+    {
+        $this->splitOriginalView();
+
+        return PendingView::from($this->viewWithoutScriptTag, $this->bladePath, $this->viewRootLayoutTags);
     }
 
     /**
@@ -126,24 +136,6 @@ class ExtractVueScriptFromBladeView
         return $this->isComponent()
             ? $this->viewWithoutScriptTag
             : PendingView::from($this->viewWithoutScriptTag, $this->bladePath, $this->viewRootLayoutTags);
-
-        //         $tag = app(ComponentHelper::class)->getTag($this->bladePath);
-
-        //         $hash = Str::random(24);
-
-        //         $bridge = Js::from(['tag' => $tag, 'template_hash' => $hash])->toHtml();
-
-        //         $replacement = <<<HTML
-        // {$this->viewRootLayoutTags[0]}
-        // <generic-splade-component :bridge="{$bridge}"></generic-splade-component>
-        // {$this->viewRootLayoutTags[1]}
-        // HTML;
-
-        //         return [
-        //             'hash' => $hash,
-        //             'toRender' => $this->viewWithoutScriptTag,
-        //             'replacement' => $replacement,
-        //         ];
     }
 
     /**
@@ -294,7 +286,7 @@ class ExtractVueScriptFromBladeView
     protected function extractDefinePropsFromScript(): array
     {
         $defaultProps = Collection::make(['spladeTemplateId' => 'String'])
-            ->when($this->isComponent(), fn (Collection $collection) => $collection->put('spladeBridge', 'Object'))
+            ->when($this->isComponent(), fn (Collection $collection) => $collection->prepend('Object', 'spladeBridge'))
             ->when($this->viewUsesVModel(), fn (Collection $collection) => $collection->put('modelValue', '{}'));
 
         $defineProps = $this->scriptParser->getDefineProps($defaultProps->all());
@@ -323,9 +315,17 @@ class ExtractVueScriptFromBladeView
             ->sort()
             ->implode(',');
 
-        $spladeCoreImports = $this->needsSpladeBridge()
-            ? 'BladeComponent, GenericSpladeComponent'
-            : 'GenericSpladeComponent';
+        $spladeCoreImports = match (true) {
+            $this->needsSpladeBridge() => 'BladeComponent, GenericSpladeComponent',
+            $this->isComponent() => 'GenericSpladeComponent',
+            default => '',
+        };
+
+        if (! $spladeCoreImports) {
+            return <<<JS
+import { {$vueFunctionsImports} } from 'vue';
+JS;
+        }
 
         return <<<JS
 import { {$spladeCoreImports} } from '@protonemedia/laravel-splade-core'
@@ -381,10 +381,6 @@ JS;
      */
     protected function renderBladePropertiesAsComputedVueProperties(): string
     {
-        if (! $this->isRefreshable()) {
-            return '';
-        }
-
         $lines = [];
 
         foreach ($this->getBladeProperties() as $property) {
@@ -440,11 +436,15 @@ JS : '';
             ->when($this->viewUsesElementRefs(), fn (Collection $collection) => $collection->push('setSpladeRef'))
             ->implode(',');
 
+        $componentsObject = $this->isComponent() ? <<<'JS'
+components: { GenericSpladeComponent },
+JS : '';
+
         return <<<JS
 const spladeRender = h({
     {$inheritAttrs}
     name: "{$this->getTag()}Render",
-    components: {GenericSpladeComponent},
+    {$componentsObject}
     template: spladeTemplates[props.spladeTemplateId],
     data: () => { return { {$dataObject} } }
 });

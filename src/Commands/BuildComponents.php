@@ -44,7 +44,7 @@ class BuildComponents extends Command
 
                 $contents = $filesystem->get($viewPath);
 
-                if (! str_starts_with($contents, '<script setup>')) {
+                if (! str_contains($contents, '<script setup>')) {
                     continue;
                 }
 
@@ -56,7 +56,7 @@ class BuildComponents extends Command
                     'data' => $componentClass ? ComponentSerializer::getDataFromComponentClass($componentClass) : [],
                     'tag' => $componentHelper->getTag($viewPath),
                     'functions' => $componentClass ? ComponentSerializer::getFunctionsFromComponentClass($componentClass) : [],
-                ]], $path)->handle($filesystem);
+                ]], $viewPath)->handle($filesystem);
             }
         }
 

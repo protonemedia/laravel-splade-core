@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Str;
 use Illuminate\View\Engines\CompilerEngine as BaseCompilerEngine;
 use ProtoneMedia\SpladeCore\ComponentHelper;
-use ProtoneMedia\SpladeCore\PendingView;
+use ProtoneMedia\SpladeCore\ExtractVueScriptFromBladeView;
 
 class CompilerEngine extends BaseCompilerEngine
 {
@@ -31,7 +31,9 @@ class CompilerEngine extends BaseCompilerEngine
         $compiler = $this->compiler;
         $compiler->setData($data);
 
-        if (str_contains($path, DIRECTORY_SEPARATOR.'components'.DIRECTORY_SEPARATOR)) {
+        $isComponent = str_contains($path, DIRECTORY_SEPARATOR.'components'.DIRECTORY_SEPARATOR);
+
+        if ($isComponent) {
             $vueComponent = $this->componentHelper->getTag($path).'.vue';
 
             // Delete the compiled script if the Vue component is not found,
@@ -42,6 +44,23 @@ class CompilerEngine extends BaseCompilerEngine
             }
         }
 
+        $result = tap(
+            parent::get($path, $data),
+            fn () => $compiler->setData([])
+        );
+
+        if ($isComponent) {
+            return $result;
+        }
+
+        $service = ExtractVueScriptFromBladeView::from($this->files->get($path), $data, $path);
+
+        if (! $service->hasScriptSetup()) {
+            return $result;
+        }
+
+        $pendingView = $service->getPendingView();
+
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 6);
 
         // prevent leaking the full path
@@ -49,21 +68,8 @@ class CompilerEngine extends BaseCompilerEngine
 
         $hash = md5($tracePath.'.'.$trace[5]['line']);
 
-        $result = parent::get($path, $data);
-        $compiler->setData([]);
-
-        // TODO: evaluate if $path contains <script setup> tag,
-        // move stuff over from BladeCompiler::compileString()
-        if (! array_key_exists($hash, $compiler->pendingViews)) {
-            return $result;
-        }
-
-        /** @var PendingView */
-        $pendingView = $compiler->pendingViews[$hash];
-
         app('view')->pushSpladeTemplate($hash, $result);
 
         return $pendingView->render($hash);
-
     }
 }

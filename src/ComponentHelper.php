@@ -76,7 +76,9 @@ class ComponentHelper
         $class = $this->getClass($component);
 
         if (! $class) {
-            $isComponent = $component instanceof Component || Str::contains($component, 'components.');
+            $isComponent = $component instanceof Component
+                || Str::contains($component, 'components.')
+                || Str::contains($component, '/components/');
 
             return Str::of($this->getAlias($component))
                 ->replace('.', ' ')
@@ -117,8 +119,8 @@ class ComponentHelper
 
         return Str::of($relativePath)
             ->beforeLast('.blade.php')
-            ->after(DIRECTORY_SEPARATOR.'components'.DIRECTORY_SEPARATOR)
-            ->replace(DIRECTORY_SEPARATOR, '.')
+            ->after('/components/')
+            ->replace('/', '.')
             ->toString();
     }
 

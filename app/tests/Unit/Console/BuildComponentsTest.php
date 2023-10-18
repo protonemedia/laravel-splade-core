@@ -20,18 +20,20 @@ class BuildComponentsTest extends TestCase
         $this->assertEquals(0, Artisan::call(BuildComponents::class));
 
         foreach ([
-            'Anonymous',
-            'BladeMethod',
-            'BladeMethodCallbacks',
-            'ChangeBladeProp',
-            'DatePicker',
-            'Form',
-            'Time',
-            'TimeState',
-            'TwoWayBinding',
+            'ComponentAnonymous',
+            'ComponentBladeMethod',
+            'ComponentBladeMethodCallbacks',
+            'ComponentChangeBladeProp',
+            'ComponentDatePicker',
+            'ComponentForm',
+            'ComponentTime',
+            'ComponentTimeState',
+            'ComponentTwoWayBinding',
+            'IncludedView',
+            'RegularView',
         ] as $component) {
-            $this->assertFileExists(resource_path('js/splade/SpladeComponent'.$component.'.vue'));
-            $this->assertMatchesVueSnapshot($filesytem->get(resource_path('js/splade/SpladeComponent'.$component.'.vue')));
+            $this->assertFileExists(resource_path('js/splade/Splade'.$component.'.vue'));
+            $this->assertMatchesVueSnapshot($filesytem->get(resource_path('js/splade/Splade'.$component.'.vue')));
         }
     }
 }

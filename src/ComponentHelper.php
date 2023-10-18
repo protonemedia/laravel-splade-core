@@ -51,12 +51,12 @@ class ComponentHelper
         if (Str::contains($component, 'components.')) {
             // Anonymous component
             $filename = Str::of($component)
-                ->replace('.', DIRECTORY_SEPARATOR)
+                ->replace('.', '/')
                 ->append('.blade.php');
 
             foreach ($this->getViewPaths() as $path) {
-                if ($this->filesystem->exists($path.DIRECTORY_SEPARATOR.$filename)) {
-                    return $path.DIRECTORY_SEPARATOR.$filename;
+                if ($this->filesystem->exists($path.'/'.$filename)) {
+                    return $path.'/'.$filename;
                 }
             }
         }
@@ -76,10 +76,14 @@ class ComponentHelper
         $class = $this->getClass($component);
 
         if (! $class) {
+            $isComponent = $component instanceof Component
+                || Str::contains($component, 'components.')
+                || Str::contains($component, '/components/');
+
             return Str::of($this->getAlias($component))
                 ->replace('.', ' ')
                 ->studly()
-                ->prepend('SpladeComponent')
+                ->prepend($isComponent ? 'SpladeComponent' : 'Splade')
                 ->toString();
         }
 
@@ -102,6 +106,8 @@ class ComponentHelper
 
             return Str::after($fullPath, $path);
         }
+
+        return null;
     }
 
     /**
@@ -115,8 +121,8 @@ class ComponentHelper
 
         return Str::of($relativePath)
             ->beforeLast('.blade.php')
-            ->after(DIRECTORY_SEPARATOR.'components'.DIRECTORY_SEPARATOR)
-            ->replace(DIRECTORY_SEPARATOR, '.')
+            ->after('/components/')
+            ->replace('/', '.')
             ->toString();
     }
 

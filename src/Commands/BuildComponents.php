@@ -3,16 +3,16 @@
 namespace ProtoneMedia\SpladeCore\Commands;
 
 use Illuminate\Console\Command;
+use ProtoneMedia\SpladeCore\BladeViewExtractor;
 use ProtoneMedia\SpladeCore\ComponentHelper;
 use ProtoneMedia\SpladeCore\ComponentSerializer;
-use ProtoneMedia\SpladeCore\ExtractVueScriptFromBladeView;
 use Symfony\Component\Finder\SplFileInfo;
 
 class BuildComponents extends Command
 {
     public $signature = 'splade:core:build-components {--unprocessed}';
 
-    public $description = 'Builds all Blade Components with Splade Core';
+    public $description = 'Builds all Vue Components with Splade Core';
 
     public function handle(ComponentHelper $componentHelper): int
     {
@@ -44,7 +44,7 @@ class BuildComponents extends Command
 
                 $contents = $filesystem->get($viewPath);
 
-                if (! str_starts_with($contents, '<script setup>')) {
+                if (! str_contains($contents, '<script setup>')) {
                     continue;
                 }
 
@@ -52,11 +52,11 @@ class BuildComponents extends Command
 
                 $componentClass = $componentHelper->getClass($viewPath);
 
-                ExtractVueScriptFromBladeView::from($contents, ['spladeBridge' => [
+                BladeViewExtractor::from($contents, ['spladeBridge' => [
                     'data' => $componentClass ? ComponentSerializer::getDataFromComponentClass($componentClass) : [],
                     'tag' => $componentHelper->getTag($viewPath),
                     'functions' => $componentClass ? ComponentSerializer::getFunctionsFromComponentClass($componentClass) : [],
-                ]], $path)->handle($filesystem);
+                ]], $viewPath)->handle($filesystem);
             }
         }
 

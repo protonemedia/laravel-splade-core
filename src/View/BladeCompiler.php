@@ -3,6 +3,7 @@
 namespace ProtoneMedia\SpladeCore\View;
 
 use Illuminate\View\Compilers\BladeCompiler as BaseBladeCompiler;
+use ProtoneMedia\SpladeCore\BladeViewExtractor;
 
 class BladeCompiler extends BaseBladeCompiler
 {
@@ -12,27 +13,13 @@ class BladeCompiler extends BaseBladeCompiler
     protected array $data = [];
 
     /**
-     * Callbacks that are called before compiling the string.
-     */
-    protected static array $beforeCompilingStringCallbacks = [];
-
-    /**
-     * Registers a callback that is called before compiling the string.
-     */
-    public static function beforeCompilingString(callable $callback): void
-    {
-        static::$beforeCompilingStringCallbacks[] = $callback;
-    }
-
-    /**
      * Extract the Vue script from the given template.
      */
     public function compileString($value): string
     {
-        foreach (static::$beforeCompilingStringCallbacks as $callback) {
-            $callback = $callback->bindTo($this, static::class);
-            $value = $callback($value, $this->data, $this->getPath());
-        }
+        $value = BladeViewExtractor::from(
+            $value, $this->data, $this->getPath()
+        )->handle($this->files);
 
         return parent::compileString($value);
     }

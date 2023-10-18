@@ -10,7 +10,7 @@ class ClearComponents extends Command
 {
     public $signature = 'splade:core:clear-components';
 
-    public $description = 'Clears all compiled Blade Components by Splade Core';
+    public $description = 'Clears all compiled Vue Components by Splade Core';
 
     public function handle(Filesystem $filesystem): int
     {

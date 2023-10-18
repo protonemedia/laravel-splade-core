@@ -2,43 +2,48 @@
 
 namespace ProtoneMedia\SpladeCore\View;
 
-use App\View\Components\Layout;
 use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 use Illuminate\View\ComponentAttributeBag;
 use Illuminate\View\Factory as BaseFactory;
+use ProtoneMedia\SpladeCore\AddSpladeToComponentData;
 
 class Factory extends BaseFactory
 {
+    /**
+     * Whether to track Splade components.
+     */
     protected static bool $trackSpladeComponents = false;
 
+    /**
+     * The tracked Splade components.
+     */
     protected static array $spladeComponents = [];
 
-    protected static array $beforeStartComponentCallbacks = [];
-
+    /**
+     * Enable tracking of Splade components.
+     */
     public static function trackSpladeComponents(): void
     {
         static::$trackSpladeComponents = true;
         static::clearSpladeComponents();
     }
 
+    /**
+     * Clear the tracked Splade components.
+     */
     public static function clearSpladeComponents(): void
     {
         static::$spladeComponents = [];
     }
 
+    /**
+     * Get the tracked Splade components.
+     */
     public static function getSpladeComponent(string $key): ?string
     {
         return static::$spladeComponents[$key] ?? null;
-    }
-
-    /**
-     * Register a callback to be called before the component is started.
-     */
-    public static function beforeStartComponent(callable $callback): void
-    {
-        static::$beforeStartComponentCallbacks[] = $callback;
     }
 
     /**
@@ -46,11 +51,7 @@ class Factory extends BaseFactory
      */
     public function startComponent($view, array $data = [], $component = null)
     {
-        if ($component instanceof Layout) {
-            return parent::startComponent($view, $data);
-        }
-
-        if ($component instanceof Component && ! empty(static::$beforeStartComponentCallbacks)) {
+        if ($component instanceof Component) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
 
             // prevent leaking the full path
@@ -58,15 +59,47 @@ class Factory extends BaseFactory
 
             $hash = md5($path.'.'.$trace[0]['line']);
 
-            foreach (static::$beforeStartComponentCallbacks as $callback) {
-                $callback = $callback->bindTo($this, static::class);
-                $callback($component, $data, $hash, $view);
-            }
+            (new AddSpladeToComponentData)($component, $data, $hash, $view);
         }
 
         return parent::startComponent($view, $data);
     }
 
+    /**
+     * Initialize the stack for the Splade templates once.
+     */
+    protected function prepareSpladeTemplatesStack(): void
+    {
+        if ($this->hasRenderedOnce('splade-templates')) {
+            return;
+        }
+
+        $this->markAsRenderedOnce('splade-templates');
+        $this->extendPush('splade-templates', 'const spladeTemplates = {};');
+    }
+
+    /**
+     * Pushes a Splade template to the stack.
+     */
+    public function pushSpladeTemplate($id, $value): void
+    {
+        $this->prepareSpladeTemplatesStack();
+
+        $value = Js::from($value)->toHtml();
+
+        $this->extendPush(
+            'splade-templates',
+            "spladeTemplates['{$id}'] = {$value};"
+        );
+    }
+
+    /**
+     * Temporarily store the passed attributes, render the component and
+     * push it to the Splade templates stack. Then return a generic Vue
+     * component that will grab the template from the stack.
+     *
+     * @return string
+     */
     public function renderComponent()
     {
         /** @var array */
@@ -88,17 +121,7 @@ class Factory extends BaseFactory
             static::$spladeComponents[$templateId] = $output;
         }
 
-        if (! $this->hasRenderedOnce('splade-templates')) {
-            $this->markAsRenderedOnce('splade-templates');
-            $this->extendPush('splade-templates', 'const spladeTemplates = {};');
-        }
-
-        $template = Js::from($output)->toHtml();
-
-        $this->extendPush(
-            'splade-templates',
-            "spladeTemplates['{$templateId}'] = {$template};"
-        );
+        $this->pushSpladeTemplate($templateId, $output);
 
         $spladeBridge = Js::from($componentData['spladeBridge'])->toHtml();
 

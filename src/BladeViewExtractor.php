@@ -3,13 +3,17 @@
 namespace ProtoneMedia\SpladeCore;
 
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
-class ExtractVueScriptFromBladeView
+class BladeViewExtractor
 {
     protected readonly string $originalScript;
+
+    protected array $viewRootLayoutTags = [];
 
     protected string $viewWithoutScriptTag;
 
@@ -20,6 +24,9 @@ class ExtractVueScriptFromBladeView
         protected readonly array $data,
         protected readonly string $bladePath
     ) {
+        if (! Str::endsWith($bladePath, '.blade.php')) {
+            throw new InvalidArgumentException("The Blade Path must end with '.blade.php'.");
+        }
     }
 
     /**
@@ -31,11 +38,66 @@ class ExtractVueScriptFromBladeView
     }
 
     /**
+     * Check if the view is a Blade Component.
+     */
+    protected function isComponent(): bool
+    {
+        return array_key_exists('spladeBridge', $this->data)
+            && Str::contains($this->bladePath, '/components/');
+    }
+
+    /**
+     * Returns a RenderViewAsVueComponent instance for the view.
+     */
+    public function getViewAsVueRenderer(): RenderViewAsVueComponent
+    {
+        $this->splitOriginalView();
+
+        return RenderViewAsVueComponent::from($this->viewWithoutScriptTag, $this->bladePath, $this->viewRootLayoutTags);
+    }
+
+    /**
+     * Check if the view has a <script setup> tag.
+     */
+    public function hasScriptSetup(): bool
+    {
+        return str_contains($this->originalView, '<script setup>');
+    }
+
+    /**
+     * Check if the view is wrapped in a root layout.
+     */
+    protected function extractWrappedViewInRootLayout(): void
+    {
+        $originalView = trim($this->originalView);
+
+        if (! Str::startsWith($originalView, '<x-')) {
+            return;
+        }
+
+        // find last closing html tag
+        $endTag = trim(Arr::last(explode(PHP_EOL, $originalView)));
+
+        if (! (Str::startsWith($endTag, '</') && Str::endsWith($endTag, '>'))) {
+            return;
+        }
+
+        $tag = Str::between($endTag, '</', '>');
+
+        preg_match_all('/(<'.$tag.'.*?>)(.*?)(<\/'.$tag.'>)/s', $originalView, $matches);
+
+        $this->viewRootLayoutTags = [
+            $matches[1][0], // <x-layout {{ $attributes }}>
+            $matches[3][0], // </x-layout>
+        ];
+    }
+
+    /**
      * Handle the extraction of the Vue script. Returns the view without the <script setup> tag.
      */
     public function handle(Filesystem $filesystem): string
     {
-        if (! str_starts_with(trim($this->originalView), '<script setup>')) {
+        if (! $this->hasScriptSetup()) {
             // The view does not contain a <script setup> tag, so we don't need to do anything.
             return $this->originalView;
         }
@@ -89,7 +151,7 @@ class ExtractVueScriptFromBladeView
      */
     protected function getBladeFunctions(): array
     {
-        return $this->data['spladeBridge']['functions'];
+        return $this->data['spladeBridge']['functions'] ?? [];
     }
 
     /**
@@ -97,7 +159,7 @@ class ExtractVueScriptFromBladeView
      */
     protected function getBladeProperties(): array
     {
-        return array_keys($this->data['spladeBridge']['data']);
+        return array_keys($this->data['spladeBridge']['data'] ?? []);
     }
 
     /**
@@ -105,7 +167,14 @@ class ExtractVueScriptFromBladeView
      */
     protected function getTag(): string
     {
-        return $this->data['spladeBridge']['tag'];
+        if ($this->isComponent()) {
+            return $this->data['spladeBridge']['tag'];
+        }
+
+        /** @var ComponentHelper */
+        $componentHelper = app(ComponentHelper::class);
+
+        return $componentHelper->getTag($this->bladePath);
     }
 
     /**
@@ -121,6 +190,10 @@ class ExtractVueScriptFromBladeView
      */
     protected function needsSpladeBridge(): bool
     {
+        if (! $this->isComponent()) {
+            return false;
+        }
+
         if (! empty($this->getBladeFunctions())) {
             return true;
         }
@@ -163,6 +236,18 @@ class ExtractVueScriptFromBladeView
             ->replaceFirst("<script setup>{$this->originalScript}</script>", '')
             ->trim()
             ->toString();
+
+        $this->extractWrappedViewInRootLayout();
+
+        if (empty($this->viewRootLayoutTags)) {
+            return;
+        }
+
+        $this->viewWithoutScriptTag = Str::of($this->viewWithoutScriptTag)
+            ->after($this->viewRootLayoutTags[0])
+            ->beforeLast($this->viewRootLayoutTags[1])
+            ->trim()
+            ->toString();
     }
 
     /**
@@ -170,6 +255,10 @@ class ExtractVueScriptFromBladeView
      */
     protected function replaceComponentMethodLoadingStates(string $script): string
     {
+        if (! $this->isComponent()) {
+            return $script;
+        }
+
         $methods = ['refreshComponent', ...$this->getBladeFunctions()];
 
         return preg_replace_callback('/(\w+)\.loading/', function ($matches) use ($methods) {
@@ -196,10 +285,9 @@ class ExtractVueScriptFromBladeView
      */
     protected function extractDefinePropsFromScript(): array
     {
-        $defaultProps = Collection::make([
-            'spladeBridge' => 'Object',
-            'spladeTemplateId' => 'String',
-        ])->when($this->viewUsesVModel(), fn (Collection $collection) => $collection->put('modelValue', '{}'));
+        $defaultProps = Collection::make(['spladeTemplateId' => 'String'])
+            ->when($this->isComponent(), fn (Collection $collection) => $collection->prepend('Object', 'spladeBridge'))
+            ->when($this->viewUsesVModel(), fn (Collection $collection) => $collection->put('modelValue', '{}'));
 
         $defineProps = $this->scriptParser->getDefineProps($defaultProps->all());
 
@@ -222,14 +310,22 @@ class ExtractVueScriptFromBladeView
             ->push('h')
             ->when($this->needsSpladeBridge(), fn ($collection) => $collection->push('ref'))
             ->when($this->isRefreshable(), fn ($collection) => $collection->push('inject'))
-            ->unless(empty($this->getBladeProperties()), fn ($collection) => $collection->push('computed'))
+            ->when($this->isComponent() && ! empty($this->getBladeProperties()), fn ($collection) => $collection->push('computed'))
             ->unique()
             ->sort()
             ->implode(',');
 
-        $spladeCoreImports = $this->needsSpladeBridge()
-            ? 'BladeComponent, GenericSpladeComponent'
-            : 'GenericSpladeComponent';
+        $spladeCoreImports = match (true) {
+            $this->needsSpladeBridge() => 'BladeComponent, GenericSpladeComponent',
+            $this->isComponent() => 'GenericSpladeComponent',
+            default => '',
+        };
+
+        if (! $spladeCoreImports) {
+            return <<<JS
+import { {$vueFunctionsImports} } from 'vue';
+JS;
+        }
 
         return <<<JS
 import { {$spladeCoreImports} } from '@protonemedia/laravel-splade-core'
@@ -340,11 +436,15 @@ JS : '';
             ->when($this->viewUsesElementRefs(), fn (Collection $collection) => $collection->push('setSpladeRef'))
             ->implode(',');
 
+        $componentsObject = $this->isComponent() ? <<<'JS'
+components: { GenericSpladeComponent },
+JS : '';
+
         return <<<JS
 const spladeRender = h({
     {$inheritAttrs}
     name: "{$this->getTag()}Render",
-    components: {GenericSpladeComponent},
+    {$componentsObject}
     template: spladeTemplates[props.spladeTemplateId],
     data: () => { return { {$dataObject} } }
 });

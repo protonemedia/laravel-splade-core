@@ -2,9 +2,8 @@
 
 namespace ProtoneMedia\SpladeCore\View;
 
-use Illuminate\Support\Str;
 use Illuminate\View\Compilers\BladeCompiler as BaseBladeCompiler;
-use ProtoneMedia\SpladeCore\ExtractVueScriptFromBladeView;
+use ProtoneMedia\SpladeCore\BladeViewExtractor;
 
 class BladeCompiler extends BaseBladeCompiler
 {
@@ -22,25 +21,10 @@ class BladeCompiler extends BaseBladeCompiler
      */
     public function compileString($value): string
     {
-        $service = ExtractVueScriptFromBladeView::from($value, $this->data, $this->getPath());
+        $result = BladeViewExtractor::from($value, $this->data, $this->getPath())
+            ->handle($this->files);
 
-        $result = $service->handle($this->files);
-
-        if (is_string($result)) {
-            return parent::compileString($result);
-        }
-
-        // TODO: move to CompilerEngine::get()
-        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 9);
-
-        // prevent leaking the full path
-        $path = Str::after($trace[8]['file'], base_path());
-
-        $hash = md5($path.'.'.$trace[8]['line']);
-
-        $this->pendingViews[$hash] = $result->setOriginalView($value);
-
-        return parent::compileString($result->viewWithoutScript);
+        return parent::compileString($result);
     }
 
     /**

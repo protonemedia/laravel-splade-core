@@ -131,8 +131,6 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
 
             return $factory;
         });
-
-        Factory::beforeStartComponent(AddSpladeToComponentData::callback());
     }
 
     public function packageBooted()

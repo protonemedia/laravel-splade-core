@@ -5,12 +5,11 @@ namespace ProtoneMedia\SpladeCore;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
-class ExtractVueScriptFromBladeView
+class BladeViewExtractor
 {
     protected readonly string $originalScript;
 
@@ -45,6 +44,13 @@ class ExtractVueScriptFromBladeView
     {
         return array_key_exists('spladeBridge', $this->data)
             && Str::contains($this->bladePath, '/components/');
+    }
+
+    public function getPendingView(): PendingView
+    {
+        $this->splitOriginalView();
+
+        return PendingView::from($this->viewWithoutScriptTag, $this->bladePath, $this->viewRootLayoutTags);
     }
 
     /**
@@ -83,17 +89,10 @@ class ExtractVueScriptFromBladeView
         ];
     }
 
-    public function getPendingView(): PendingView
-    {
-        $this->splitOriginalView();
-
-        return PendingView::from($this->viewWithoutScriptTag, $this->bladePath, $this->viewRootLayoutTags);
-    }
-
     /**
      * Handle the extraction of the Vue script. Returns the view without the <script setup> tag.
      */
-    public function handle(Filesystem $filesystem): string|PendingView
+    public function handle(Filesystem $filesystem): string
     {
         if (! $this->hasScriptSetup()) {
             // The view does not contain a <script setup> tag, so we don't need to do anything.
@@ -133,9 +132,7 @@ class ExtractVueScriptFromBladeView
             Process::path(base_path())->run("node_modules/.bin/eslint --fix {$vuePath}");
         }
 
-        return $this->isComponent()
-            ? $this->viewWithoutScriptTag
-            : PendingView::from($this->viewWithoutScriptTag, $this->bladePath, $this->viewRootLayoutTags);
+        return $this->viewWithoutScriptTag;
     }
 
     /**

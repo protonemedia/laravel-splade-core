@@ -18,6 +18,8 @@ class DemoRoutesTest extends TestCase
             ['/refresh-state'],
             ['/refresh'],
             ['/two-way-binding'],
+            ['/base-view'],
+            ['/regular-view'],
         ];
     }
 

@@ -10,7 +10,6 @@
         <script> @stack('splade-templates') </script>
 
         <div id="app">
-            <div>SPLADE CORE</div>
             {{ $slot }}
         </div>
     </body>

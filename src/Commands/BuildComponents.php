@@ -3,9 +3,9 @@
 namespace ProtoneMedia\SpladeCore\Commands;
 
 use Illuminate\Console\Command;
+use ProtoneMedia\SpladeCore\BladeViewExtractor;
 use ProtoneMedia\SpladeCore\ComponentHelper;
 use ProtoneMedia\SpladeCore\ComponentSerializer;
-use ProtoneMedia\SpladeCore\ExtractVueScriptFromBladeView;
 use Symfony\Component\Finder\SplFileInfo;
 
 class BuildComponents extends Command
@@ -52,7 +52,7 @@ class BuildComponents extends Command
 
                 $componentClass = $componentHelper->getClass($viewPath);
 
-                ExtractVueScriptFromBladeView::from($contents, ['spladeBridge' => [
+                BladeViewExtractor::from($contents, ['spladeBridge' => [
                     'data' => $componentClass ? ComponentSerializer::getDataFromComponentClass($componentClass) : [],
                     'tag' => $componentHelper->getTag($viewPath),
                     'functions' => $componentClass ? ComponentSerializer::getFunctionsFromComponentClass($componentClass) : [],

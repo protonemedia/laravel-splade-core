@@ -2,20 +2,18 @@
 
 namespace ProtoneMedia\SpladeCore\View;
 
-use App\View\Components\Layout;
 use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 use Illuminate\View\ComponentAttributeBag;
 use Illuminate\View\Factory as BaseFactory;
+use ProtoneMedia\SpladeCore\AddSpladeToComponentData;
 
 class Factory extends BaseFactory
 {
     protected static bool $trackSpladeComponents = false;
 
     protected static array $spladeComponents = [];
-
-    protected static array $beforeStartComponentCallbacks = [];
 
     public static function trackSpladeComponents(): void
     {
@@ -34,23 +32,11 @@ class Factory extends BaseFactory
     }
 
     /**
-     * Register a callback to be called before the component is started.
-     */
-    public static function beforeStartComponent(callable $callback): void
-    {
-        static::$beforeStartComponentCallbacks[] = $callback;
-    }
-
-    /**
      * Execute the callback before the component is started.
      */
     public function startComponent($view, array $data = [], $component = null)
     {
-        if ($component instanceof Layout) {
-            return parent::startComponent($view, $data);
-        }
-
-        if ($component instanceof Component && ! empty(static::$beforeStartComponentCallbacks)) {
+        if ($component instanceof Component) {
             $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
 
             // prevent leaking the full path
@@ -58,10 +44,7 @@ class Factory extends BaseFactory
 
             $hash = md5($path.'.'.$trace[0]['line']);
 
-            foreach (static::$beforeStartComponentCallbacks as $callback) {
-                $callback = $callback->bindTo($this, static::class);
-                $callback($component, $data, $hash, $view);
-            }
+            (new AddSpladeToComponentData)($component, $data, $hash, $view);
         }
 
         return parent::startComponent($view, $data);

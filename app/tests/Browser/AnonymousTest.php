@@ -12,7 +12,6 @@ class AnonymousTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/anonymous')
-                ->waitForText('SPLADE CORE')
                 ->type('message', 'Hello World')
                 ->assertSeeIn('@reversed', 'dlroW olleH');
         });

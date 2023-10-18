@@ -40,7 +40,24 @@ You can install the package via composer:
 composer require protonemedia/laravel-splade-core
 ```
 
-Next, you should install the companion JavaScript packages:
+### Automatic Installation
+
+For new projects, you may use the `splade:core:install` Artisan command to automatically install the package:
+
+```bash
+php artisan splade:core:install
+```
+
+This will install the JavaScript packages, create a root layout and a demo component, and add the required configuration to your `app.js` and `vite.config.js` files. After running this command, you may run `npm install` to install the JavaScript dependencies, and then run `npm run dev` to start Vite.
+
+```bash
+npm install
+npm run dev
+```
+
+### Manual Installation
+
+First, you should install the companion JavaScript packages:
 
 ```bash
 npm install @protonemedia/laravel-splade-core @protonemedia/laravel-splade-vite

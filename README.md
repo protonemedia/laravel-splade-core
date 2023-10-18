@@ -1,6 +1,6 @@
 # [Experimental] Laravel Splade Core
 
-A package to use Vue 3's Composition API in Laravel Blade components.
+A package to use Vue 3's Composition API in Laravel Blade.
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/protonemedia/laravel-splade-core.svg)](https://packagist.org/packages/protonemedia/laravel-splade-core)
 [![GitHub Tests Action Status](https://github.com/protonemedia/laravel-splade-core/actions/workflows/run-tests.yml/badge.svg?branch=main&event=label)](https://github.com/protonemedia/laravel-splade-core/actions/workflows/run-tests.yml)
@@ -26,11 +26,22 @@ Laravel Splade currently offers a ton of features:
 
 While this is great and tremendously helps to build SPAs with Laravel, it also makes it harder to maintain and extend the package. This is why I decided to split Splade into multiple packages:
 
-- Splade Core: This package. It only contains the core functionality to use Vue 3's Composition API in Blade components. No pre-built components. No markup. No CSS. Just the core functionality.
+- Splade Core: This package. It only contains the core functionality to use Vue 3's Composition API in Blade. No pre-built components. No markup. No CSS. Just the core functionality.
 - Splade Navigation: The SPA and Navigation components from the original Splade package (Modals, Slideovers, Toasts, SEO, SSR, etc.)
 - Splade UI: The UI components from the original Splade package, excluding the Form and Table components.
 - Splade Form: The Form components from the original Splade package.
 - Splade Table: The Table components from the original Splade package.
+
+## Requirements
+
+- PHP 8.1
+- Laravel 10
+- Vue 3.3
+- Vite 4.0
+
+## Limitations
+
+- Inline Blade components are not supported (where the template is defined in the component class).
 
 ## Installation
 
@@ -63,7 +74,7 @@ First, you should install the companion JavaScript packages:
 npm install @protonemedia/laravel-splade-core @protonemedia/laravel-splade-vite
 ```
 
-Splade Core automatically generates Vue components for all your Blade components. By default, they are stored in `resources/js/splade`. You don't have to commit these files to your repository, as they are automatically generated when you run Vite. To initialize this directory, run the following command:
+Splade Core automatically generates Vue components for all your Blade templates. By default, they are stored in `resources/js/splade`. You don't have to commit these files to your repository, as they are automatically generated when you run Vite. To initialize this directory, run the following command:
 
 ```bash
 php artisan splade:core:initialize-directory
@@ -124,7 +135,7 @@ Lastly, in your root layout file, you must create a root element for your Vue ap
 </html>
 ```
 
-## Usage
+## Usage with Blade Components
 
 You may use the default `make:component` Artisan command to generate a Blade Component:
 
@@ -307,6 +318,38 @@ notify.catch((e) => {
 <input v-model="message" placeholder="Enter a message" />
 <button @click="notify('Hey there!')">Notify User</button>
 ```
+
+### Refresh Component
+
+You may use the `refresh` method to refresh the component. This will re-render the component and re-fetch the data.
+
+```vue
+<script setup>
+const message = ref('Initial message')
+</script>
+
+<input v-model="message" placeholder="Enter a message" />
+<small>User last updated: {{ auth()->user()->updated_at }}</small>
+<button @click="refreshComponent">Refresh</button>
+```
+
+Similar to calling Blade Methods, you can use `refreshComponent.loading` to check if the component is currently refreshing. You may also use callbacks with `refreshComponent`.
+
+## Usage with Blade Views
+
+If you don't want to use Blade Components, you may also use Blade Views. Currently, reloading of Blade Views is not supported.
+
+Just like with Blade Components, you may use a `<script setup>` tag at the top of your Blade View. If you're extending a layout, make sure to place the `<script setup>` tag inside the slot:
+
+```vue
+<x-layout>
+    <script setup>
+        const message = ref('Hello Vue!')
+    </script>
+
+    <input v-model="message" />
+</x-layout>
+```blade
 
 ## Changelog
 

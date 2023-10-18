@@ -1,6 +1,6 @@
 {
     "name": "protonemedia/laravel-splade-core",
-    "description": "A package to use Vue 3's Composition API in Laravel Blade components.",
+    "description": "A package to use Vue 3's Composition API in Laravel Blade.",
     "keywords": [
         "protonemedia",
         "laravel",

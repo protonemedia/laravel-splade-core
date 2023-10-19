@@ -282,7 +282,7 @@ Note that you can use `props.modelValue` without defining it. Splade Core automa
 
 ### Calling methods on the Blade Component
 
-If your Blade Component has a `public` method, you may call it from the template, either in the script or in the template. Splade Core detects the HTTP Middleware of the current page and applies it to subsequent requests.
+If your Blade Component has a `public` method, you may call it from the template, either in the script or in the template. Splade Core detects the HTTP Middleware of the current page and applies it to subsequent requests. The only thing you have to do is add the `Vue` attribute to the method:
 
 ```php
 <?php
@@ -290,9 +290,11 @@ If your Blade Component has a `public` method, you may call it from the template
 namespace App\View\Components;
 
 use Illuminate\View\Component;
+use ProtoneMedia\SpladeCore\Attributes\Vue;
 
 class UserProfile extends Component
 {
+    #[Vue]
     public function notify(string $message)
     {
         auth()->user()->notify($message);
@@ -324,7 +326,7 @@ Note that you can use `notify.loading` to check if the method is currently runni
 
 #### Blade Variables
 
-Public properties of the Blade Component are automatically passed as Vue props. You may even update them on the frontend, and when you call a Blade Component method, the value will be updated on the backend.
+Public properties of the Blade Component are automatically passed as Vue props. You may even update them on the frontend, and when you call a Blade Component method, the value will be updated on the backend. The only thing you have to do is add the `Vue` attribute to the property:
 
 ```php
 <?php
@@ -332,9 +334,11 @@ Public properties of the Blade Component are automatically passed as Vue props. 
 namespace App\View\Components;
 
 use Illuminate\View\Component;
+use ProtoneMedia\SpladeCore\Attributes\Vue;
 
 class UserProfile extends Component
 {
+    #[Vue]
     public string $notification = 'Hey there!'
 
     public function notify()

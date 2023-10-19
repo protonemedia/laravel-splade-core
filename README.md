@@ -3,7 +3,7 @@
 A package to use Vue 3's Composition API in Laravel Blade.
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/protonemedia/laravel-splade-core.svg)](https://packagist.org/packages/protonemedia/laravel-splade-core)
-[![GitHub Tests Action Status](https://github.com/protonemedia/laravel-splade-core/actions/workflows/run-tests.yml/badge.svg?branch=main&event=label)](https://github.com/protonemedia/laravel-splade-core/actions/workflows/run-tests.yml)
+[![GitHub Tests Action Status](https://github.com/protonemedia/laravel-splade-core/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/protonemedia/laravel-splade-core/actions/workflows/run-tests.yml)
 [![Splade Discord Server](https://dcbadge.vercel.app/api/server/qGJ4MkMQWm?style=flat&theme=default-inverted)](https://discord.gg/qGJ4MkMQWm)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/pascalbaljet)](https://github.com/sponsors/pascalbaljet)
 

@@ -8,8 +8,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 use JsonSerializable;
+use ProtoneMedia\SpladeCore\Attributes\Vue;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionProperty;
 
 class ComponentSerializer implements Arrayable
 {
@@ -94,6 +96,10 @@ class ComponentSerializer implements Arrayable
                 continue;
             }
 
+            if (empty($property->getAttributes(Vue::class))) {
+                continue;
+            }
+
             $value = $property->getValue($this->component);
 
             if ($value instanceof Model) {
@@ -131,6 +137,7 @@ class ComponentSerializer implements Arrayable
         $values = [];
 
         foreach ($properties as $property) {
+            /** @var ReflectionProperty $property */
             if ($property->isStatic() || ! $property->isPublic()) {
                 continue;
             }
@@ -138,6 +145,10 @@ class ComponentSerializer implements Arrayable
             $name = $property->getName();
 
             if ($name === 'componentName' || $name === 'attributes') {
+                continue;
+            }
+
+            if (empty($property->getAttributes(Vue::class))) {
                 continue;
             }
 
@@ -157,8 +168,10 @@ class ComponentSerializer implements Arrayable
         $functions = (new ReflectionClass($componentClass))->getMethods(ReflectionMethod::IS_PUBLIC);
 
         return Collection::make($functions)
+            ->reject(fn ($function) => in_array($function->getName(), $ignoredFunctions))
+            ->reject(fn (ReflectionMethod $function) => $function->isStatic())
+            ->reject(fn (ReflectionMethod $function) => empty($function->getAttributes(Vue::class)))
             ->map(fn ($function) => $function->getName())
-            ->reject(fn ($function) => in_array($function, $ignoredFunctions))
             ->values()
             ->all();
     }

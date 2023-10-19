@@ -226,6 +226,20 @@ And here's the template of the `<x-select>` component:
 </select>
 ```
 
+#### Inheritance on Components with a script tag
+
+If the component you're passing attributes to has a `<script>` tag, the attributes are passed as Vue props to the root element of the component. If you want to pass the attributes to a different element, you may use the `v-bind="$attrs"` directive:
+
+```vue
+<script setup></script>
+
+<div class="wrapper">
+    <input v-bind="$attrs" />
+</div>
+```
+
+Splade Core automatically detects the custom directive.
+
 ### Element Refs
 
 You may use the `$refs` variable to access element refs. This doesn't naturally work in Vue 3's Composition API, but it was great in Vue 2, so I decided to add it back in Splade Core:
@@ -306,7 +320,7 @@ const message = ref('Hey there!')
 Note that you can use `notify.loading` to check if the method is currently running.
 
 > [!WARNING]
-> While the original Middleware is applied to the request, you should still validate the incoming data.
+> While the original Middleware is applied to the request, you should still validate the incoming data. Also, be aware that any public method can be called from the frontend.
 
 #### Blade Variables
 
@@ -426,6 +440,10 @@ Just like with Blade Components, you may use a `<script setup>` tag at the top o
     <input v-model="message" />
 </x-layout>
 ```
+
+### Including Blade Views
+
+Note that you can only use *one* script tag per Blade View. For example, if your Blade View already has a script tag, you can't include another Blade View with a script tag using the `@include` directive. If you want to do this, convert the included Blade View to a Blade Component.
 
 ## Changelog
 

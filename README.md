@@ -322,7 +322,7 @@ const message = ref('Hey there!')
 Note that you can use `notify.loading` to check if the method is currently running.
 
 > [!WARNING]
-> While the original Middleware is applied to the request, you should still validate the incoming data. Also, be aware that any public method can be called from the frontend.
+> While the original Middleware is applied to the request, you should still validate the incoming data.
 
 #### Blade Variables
 

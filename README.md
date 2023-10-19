@@ -367,7 +367,7 @@ Template:
 
 #### Callbacks
 
-Instead of calling the method from the template, you may also call it from the script. This way, you can use `try/catch` and `finally`:
+Instead of calling the method from the template, you may also call it from the script. This way, you can use `then`, `catch` and `finally`:
 
 ```vue
 <script setup>

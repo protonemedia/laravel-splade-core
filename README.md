@@ -39,9 +39,19 @@ While this is great and tremendously helps to build SPAs with Laravel, it also m
 - Vue 3.3
 - Vite 4.0
 
+## Features
+
+- Automatic installer for new projects
+- Use Vue 3's Composition API in Blade templates
+- Support for Blade Components and Blade Views
+- Call Blade Component methods from the frontend
+- Refresh Blade Components from the frontend without reloading the page
+- Use Blade Props as Vue Props
+- Tap into the Js/Vue ecosystem from within Blade templates
+
 ## Limitations
 
-- Inline Blade components are not supported (where the template is defined in the component class).
+- Inline Blade Components are not supported (where the template is defined in the component class and not in a separate `.blade.php` file).
 
 ## Installation
 
@@ -143,7 +153,7 @@ You may use the default `make:component` Artisan command to generate a Blade Com
 php artisan make:component MyComponent
 ```
 
-In the Blade template, you may use a `<script setup>` tag:
+In the Blade template, you may use a `<script setup>` tag to make your component reactive:
 
 ```vue
 <script setup>
@@ -155,11 +165,27 @@ const uppercase = computed(() => message.value.toUpperCase())
 <p v-text="uppercase" />
 ```
 
-Besides running Vite, you don't have to do anything else. The component will be automatically compiled and registered as a Vue component.
+Besides running the Vite dev server, you don't have to do anything else. The component will be automatically compiled and registered as a Vue component.
+
+### Echo syntax
+
+Blade and Vue use the same curly brace syntax to render variables. This means that you can't use the `{{ message }}` syntax in your template to render a Vue variable. Technically, this is because the Blade compiler comes before the Vue compiler. There are two ways to solve this:
+
+Use the `v-html` or `v-text` directive:
+
+```vue
+<p v-text="uppercase" />
+```
+
+Or, use the `@` symbol to escape the curly braces:
+
+```vue
+<p>@{{ uppercase }}</p>
+```
 
 ### Composition API imports
 
-In the example above, we used the `ref` and `computed` functions. Splade Core automatically imports these functions for you. Here's a list of all the functions that are automatically imported:
+In the first above, we used the `ref` and `computed` functions from Vue's Composition API. Splade Core automatically imports these functions for you. Here's a list of all the functions that are automatically imported:
 
 - `computed`
 - `nextTick`
@@ -174,7 +200,7 @@ In the example above, we used the `ref` and `computed` functions. Splade Core au
 
 ### Attribute Inheritance
 
-Just like regular Blade components, you may use the `$attributes` variable to inherit attributes passed to the component. This also works for `v-model`:
+Just like regular Blade Components, you may use the `$attributes` variable to inherit attributes passed to the component. This also works for `v-model`:
 
 Here's the template of the `<x-form>` component:
 
@@ -242,15 +268,13 @@ Note that you can use `props.modelValue` without defining it. Splade Core automa
 
 ### Calling methods on the Blade Component
 
-If your Blade Component has a `public` method, you may call it from the Vue component. Splade Core detects the HTTP Middleware of the current page and applies it to requests made from the Vue component.
+If your Blade Component has a `public` method, you may call it from the template, either in the script or in the template. Splade Core detects the HTTP Middleware of the current page and applies it to subsequent requests.
 
 ```php
 <?php
 
 namespace App\View\Components;
 
-use Closure;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
 class UserProfile extends Component
@@ -280,6 +304,50 @@ const message = ref('Hey there!')
 ```
 
 Note that you can use `notify.loading` to check if the method is currently running.
+
+> [!WARNING]
+> While the original Middleware is applied to the request, you should still validate the incoming data.
+
+#### Blade Variables
+
+Public properties of the Blade Component are automatically passed as Vue props. You may even update them on the frontend, and when you call a Blade Component method, the value will be updated on the backend.
+
+```php
+<?php
+
+namespace App\View\Components;
+
+use Illuminate\View\Component;
+
+class UserProfile extends Component
+{
+    public string $notification = 'Hey there!'
+
+    public function notify()
+    {
+        auth()->user()->notify($this->notification);
+    }
+
+    public function render()
+    {
+        return view('components.user-profile');
+    }
+}
+```
+
+Template:
+
+```vue
+<script setup></script>
+
+<input v-model="notification" placeholder="Enter a message" />
+<button @click="notify">Notify User</button>
+```
+
+> [!WARNING]
+> Be careful what to define as a public property. For example, if you define an Eloquent model as a public property, it will be serialized to JSON and passed to the frontend. Be sure sensitive attributes are [hidden](https://laravel.com/docs/10.x/eloquent-serialization#hiding-attributes-from-json).
+
+#### Callbacks
 
 Instead of calling the method from the template, you may also call it from the script. This way, you can use `try/catch` and `finally`:
 
@@ -321,7 +389,15 @@ notify.catch((e) => {
 
 ### Refresh Component
 
-You may use the `refresh` method to refresh the component. This will re-render the component and re-fetch the data.
+To make components refreshable, you must add the `Refreshable` middleware to the route:
+
+```php
+use ProtoneMedia\SpladeCore\Http\Refreshable::class;
+
+Route::get('/login', LoginController::class)->middleware(Refreshable::class);
+```
+
+Then, you may use the `refreshComponent` method to refresh the component. This will re-render the component and re-fetch the data.
 
 ```vue
 <script setup>

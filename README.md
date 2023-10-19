@@ -13,7 +13,7 @@ We sincerely value our community support in our endeavor to create and offer fre
 
 ## Why is this experimental?
 
-Although this package comes with a extensive test suite, it's important to note that it's in an experimental stage. It's a new package, and I haven't used it in production yet. Currently, I'm using the [original Splade v1](https://splade.dev) package for my production needs. However, in 2023 Q4, I plan to integrate this new package into two new projects. It's also worth mentioning that I haven't yet confirmed full compatibility between this package and all the features of the original Splade package.
+Although this package comes with an extensive test suite, it's important to note that it's in an experimental stage. It's a new package, and I haven't used it in production yet. Currently, I'm using the [original Splade v1](https://splade.dev) package for my production needs. However, in 2023 Q4, I plan to integrate this new package into two new projects. It's also worth mentioning that I haven't yet confirmed full compatibility between this package and all the features of the original Splade package.
 
 ## What does this have to do with the existing Laravel Splade package?
 
@@ -69,7 +69,7 @@ For new projects, you may use the `splade:core:install` Artisan command to autom
 php artisan splade:core:install
 ```
 
-This will install the JavaScript packages, create a root layout and a demo component, and add the required configuration to your `app.js` and `vite.config.js` files. After running this command, you may run `npm install` to install the JavaScript dependencies, and then run `npm run dev` to start Vite.
+This will install the JavaScript packages, create a root layout and a demo component, and add the required configuration to your `app.js` and `vite.config.js` files. After running this command, you may run `npm install` to install the JavaScript dependencies and then run `npm run dev` to start Vite.
 
 ```bash
 npm install
@@ -363,7 +363,7 @@ Template:
 ```
 
 > [!WARNING]
-> Be careful what to define as a public property. For example, if you define an Eloquent model as a public property, it will be serialized to JSON and passed to the frontend. Be sure sensitive attributes are [hidden](https://laravel.com/docs/10.x/eloquent-serialization#hiding-attributes-from-json).
+> Be careful what you define as a public property. For example, if you define an Eloquent model as a public property, it will be serialized to JSON and passed to the frontend. Be sure sensitive attributes are [hidden](https://laravel.com/docs/10.x/eloquent-serialization#hiding-attributes-from-json).
 
 #### Callbacks
 

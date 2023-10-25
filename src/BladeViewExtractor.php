@@ -296,8 +296,8 @@ class BladeViewExtractor
         }
 
         return [
-            str_replace($defineProps['original'], $defineProps['new'], $this->originalScript),
-            '',
+            str_replace($defineProps['original'], '', $this->originalScript),
+            $defineProps['new'],
         ];
     }
 

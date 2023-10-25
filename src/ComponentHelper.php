@@ -4,6 +4,7 @@ namespace ProtoneMedia\SpladeCore;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
+use Illuminate\Support\Stringable;
 use Illuminate\View\AnonymousComponent;
 use Illuminate\View\Compilers\ComponentTagCompiler;
 use Illuminate\View\Component;
@@ -88,7 +89,8 @@ class ComponentHelper
         }
 
         return Str::of($class)
-            ->after('\\View\\Components\\')
+            ->when(fn (Stringable $class) => $class->contains('\\View\\Components\\'), fn (Stringable $class) => $class->after('\\View\\Components\\'))
+            ->when(fn (Stringable $class) => $class->contains('\\Components\\'), fn (Stringable $class) => $class->after('\\Components\\'))
             ->prepend('SpladeComponent')
             ->replace('\\', '')
             ->toString();

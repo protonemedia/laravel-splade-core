@@ -46,7 +46,8 @@
                 "ProtoneMedia\\SpladeCore\\SpladeCoreServiceProvider"
             ],
             "aliases": {
-                "SpladeCore": "ProtoneMedia\\SpladeCore\\Facades\\SpladeCore"
+                "SpladeCore": "ProtoneMedia\\SpladeCore\\Facades\\SpladeCore",
+                "Transformer": "ProtoneMedia\\SpladeCore\\Facades\\Transformer"
             }
         }
     },

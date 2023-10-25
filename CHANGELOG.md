@@ -2,6 +2,14 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 1.4.0 - 2023-10-25
+
+### What's Changed
+
+- Ported `ParseDataAttribute` class from Splade v1 by @pascalbaljet in https://github.com/protonemedia/laravel-splade-core/pull/8
+
+**Full Changelog**: https://github.com/protonemedia/laravel-splade-core/compare/1.3.0...1.4.0
+
 ## 1.3.0 - 2023-10-25
 
 ### What's Changed

@@ -16,6 +16,7 @@ use ProtoneMedia\SpladeCore\Commands\BuildComponents;
 use ProtoneMedia\SpladeCore\Commands\ClearComponents;
 use ProtoneMedia\SpladeCore\Commands\InitializeComponentsDirectory;
 use ProtoneMedia\SpladeCore\Commands\InstallNewApp;
+use ProtoneMedia\SpladeCore\Data\TransformerRepository;
 use ProtoneMedia\SpladeCore\Http\InvokeComponentController;
 use ProtoneMedia\SpladeCore\View\BladeCompiler;
 use ProtoneMedia\SpladeCore\View\CompilerEngine;
@@ -45,6 +46,10 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
 
         $this->app->singleton(SpladeCoreRequest::class, function (Application $app) {
             return new SpladeCoreRequest(fn () => $app['request']);
+        });
+
+        $this->app->singleton(TransformerRepository::class, function () {
+            return new TransformerRepository;
         });
     }
 

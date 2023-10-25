@@ -25,7 +25,8 @@
         "phpunit/phpunit": "^10.4",
         "spatie/invade": "^2.0",
         "spatie/laravel-ignition": "^2.0",
-        "spatie/phpunit-snapshot-assertions": "^5.1"
+        "spatie/phpunit-snapshot-assertions": "^5.1",
+        "spatie/fractalistic": "^2.9"
     },
     "autoload": {
         "psr-4": {

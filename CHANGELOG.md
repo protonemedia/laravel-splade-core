@@ -2,6 +2,14 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 1.5.1 - 2023-11-22
+
+### What's Changed
+
+- Fix for component namespace by @pascalbaljet in https://github.com/protonemedia/laravel-splade-core/pull/13
+
+**Full Changelog**: https://github.com/protonemedia/laravel-splade-core/compare/1.5.0...1.5.1
+
 ## 1.5.0 - 2023-11-22
 
 ### What's Changed

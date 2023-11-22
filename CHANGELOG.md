@@ -2,6 +2,21 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 1.5.0 - 2023-11-22
+
+### What's Changed
+
+- Support for auto-importing `inject` and `provide`
+- Expose Vue Props to the template
+- Fix for 'Class "Route" not found' when visiting /app's homepage by @J87NL in https://github.com/protonemedia/laravel-splade-core/pull/6
+- Bump actions/setup-node from 3 to 4 by @dependabot in https://github.com/protonemedia/laravel-splade-core/pull/10
+
+### New Contributors
+
+- @J87NL made their first contribution in https://github.com/protonemedia/laravel-splade-core/pull/6
+
+**Full Changelog**: https://github.com/protonemedia/laravel-splade-core/compare/1.4.1...1.5.0
+
 ## 1.4.1 - 2023-10-25
 
 ### What's Changed

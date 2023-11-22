@@ -429,8 +429,9 @@ JS;
 inheritAttrs: false,
 JS : '';
 
-        $dataObject = Collection::make($this->getBladeProperties())
-            ->merge($this->scriptParser->getVariables())
+        $dataObject = Collection::make(['...props'])
+            ->merge($this->getBladeProperties())
+            ->merge($this->scriptParser->getVariables()->reject(fn ($variable) => $variable === 'props'))
             ->merge($this->getBladeFunctions())
             ->when($this->isRefreshable(), fn (Collection $collection) => $collection->push('refreshComponent'))
             ->when($this->viewUsesElementRefs(), fn (Collection $collection) => $collection->push('setSpladeRef'))

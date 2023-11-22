@@ -12,7 +12,7 @@ const spladeRender = h({
     components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
     data: () => {
-        return { refreshComponent }
+        return { ...props, refreshComponent }
     },
 })
 </script>

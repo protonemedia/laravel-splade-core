@@ -21,16 +21,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::view('/regular-view', 'regular-view');
-Route::view('/base-view', 'base-view');
 Route::view('/anonymous', 'anonymous');
-Route::view('/blade-method-callbacks', 'blade-method-callbacks');
+Route::view('/base-view', 'base-view');
 Route::view('/blade-method', 'blade-method');
+Route::view('/blade-method-callbacks', 'blade-method-callbacks');
 Route::view('/change-blade-prop', 'change-blade-prop');
 Route::view('/dynamic', 'dynamic')->withoutMiddleware(SubstituteBindings::class);
 Route::view('/form', 'form');
-Route::view('/refresh-state', 'refresh-state')->middleware(Refreshable::class);
+Route::view('/props-in-template', 'props-in-template');
 Route::view('/refresh', 'refresh')->middleware(Refreshable::class);
+Route::view('/refresh-state', 'refresh-state')->middleware(Refreshable::class);
+Route::view('/regular-view', 'regular-view');
 Route::view('/two-way-binding', 'two-way-binding');
 
 Route::get('/login', function () {

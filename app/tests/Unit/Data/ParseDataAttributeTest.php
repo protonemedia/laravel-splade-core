@@ -117,7 +117,7 @@ class JsonableTestObject implements \Illuminate\Contracts\Support\Jsonable
 
 class JsonSerializableTestObject implements \JsonSerializable
 {
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return ['key' => 'value'];
     }

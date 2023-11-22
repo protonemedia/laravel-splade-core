@@ -9,7 +9,7 @@ const spladeRender = h({
 
     template: spladeTemplates[props.spladeTemplateId],
     data: () => {
-        return { message }
+        return { ...props, message }
     },
 })
 </script>

@@ -11,7 +11,7 @@ const spladeRender = h({
     components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
     data: () => {
-        return { message, uppercase }
+        return { ...props, message, uppercase }
     },
 })
 </script>

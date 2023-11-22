@@ -188,8 +188,10 @@ Or, use the `@` symbol to escape the curly braces:
 In the first above, we used the `ref` and `computed` functions from Vue's Composition API. Splade Core automatically imports these functions for you. Here's a list of all the functions that are automatically imported:
 
 - `computed`
+- `inject`
 - `nextTick`
 - `onMounted`
+- `provide`
 - `reactive`
 - `readonly`
 - `ref`

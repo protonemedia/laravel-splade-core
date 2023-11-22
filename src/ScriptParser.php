@@ -26,8 +26,10 @@ class ScriptParser
 
     protected array $vueFunctions = [
         'computed',
+        'inject',
         'nextTick',
         'onMounted',
+        'provide',
         'reactive',
         'readonly',
         'ref',

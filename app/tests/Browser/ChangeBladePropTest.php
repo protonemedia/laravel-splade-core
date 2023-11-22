@@ -14,7 +14,7 @@ class ChangeBladePropTest extends DuskTestCase
             $browser->visit('/change-blade-prop')
                 ->assertSee('Message: Hello World')
                 ->press('Change Message with Vue')
-                ->assertSee('Message: Hey, Vue!');
+                ->waitForText('Message: Hey, Vue!');
         });
     }
 
@@ -25,7 +25,7 @@ class ChangeBladePropTest extends DuskTestCase
             $browser->visit('/change-blade-prop')
                 ->assertSee('Message: Hello World')
                 ->press('Change Message with Blade')
-                ->assertSee('Message: From the inside: Hey, Blade!');
+                ->waitForText('Message: From the inside: Hey, Blade!');
         });
     }
 }

@@ -2,6 +2,12 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 1.5.2 - 2023-11-27
+
+* Added more Vue hook methods
+
+**Full Changelog**: https://github.com/protonemedia/laravel-splade-core/compare/1.5.1...1.5.2
+
 ## 1.5.1 - 2023-11-22
 
 ### What's Changed

@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use ProtoneMedia\SpladeCore\Facades\SpladePlugin;
 
 class BladeViewExtractor
 {
@@ -16,6 +17,8 @@ class BladeViewExtractor
     protected array $viewRootLayoutTags = [];
 
     protected string $viewWithoutScriptTag;
+
+    protected ComponentHelper $componentHelper;
 
     protected ScriptParser $scriptParser;
 
@@ -27,6 +30,8 @@ class BladeViewExtractor
         if (! Str::endsWith($bladePath, '.blade.php')) {
             throw new InvalidArgumentException("The Blade Path must end with '.blade.php'.");
         }
+
+        $this->componentHelper = app(ComponentHelper::class);
     }
 
     /**
@@ -109,6 +114,10 @@ class BladeViewExtractor
         $this->viewWithoutScriptTag = $this->replaceComponentMethodLoadingStates($this->viewWithoutScriptTag);
         $this->viewWithoutScriptTag = $this->replaceElementRefs($this->viewWithoutScriptTag);
 
+        if (! SpladePlugin::shouldGenerateVueComponentForPath($this->bladePath)) {
+            return $this->viewWithoutScriptTag;
+        }
+
         // Adjust the current defineProps, or generate a new one if it didn't exist yet.
         [$script, $defineProps] = $this->extractDefinePropsFromScript();
 
@@ -171,10 +180,7 @@ class BladeViewExtractor
             return $this->data['spladeBridge']['tag'];
         }
 
-        /** @var ComponentHelper */
-        $componentHelper = app(ComponentHelper::class);
-
-        return $componentHelper->getTag($this->bladePath);
+        return $this->componentHelper->getTag($this->bladePath);
     }
 
     /**

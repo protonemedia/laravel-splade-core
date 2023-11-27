@@ -14,6 +14,7 @@ use Illuminate\View\DynamicComponent;
 use Illuminate\View\Engines\EngineResolver;
 use ProtoneMedia\SpladeCore\Commands\BuildComponents;
 use ProtoneMedia\SpladeCore\Commands\ClearComponents;
+use ProtoneMedia\SpladeCore\Commands\GeneratePluginManifest;
 use ProtoneMedia\SpladeCore\Commands\InitializeComponentsDirectory;
 use ProtoneMedia\SpladeCore\Commands\InstallNewApp;
 use ProtoneMedia\SpladeCore\Data\TransformerRepository;
@@ -33,6 +34,7 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
             ->hasConfigFile()
             ->hasCommand(BuildComponents::class)
             ->hasCommand(ClearComponents::class)
+            ->hasCommand(GeneratePluginManifest::class)
             ->hasCommand(InitializeComponentsDirectory::class)
             ->hasCommand(InstallNewApp::class);
     }
@@ -46,6 +48,10 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
 
         $this->app->singleton(SpladeCoreRequest::class, function (Application $app) {
             return new SpladeCoreRequest(fn () => $app['request']);
+        });
+
+        $this->app->singleton(SpladePluginRepository::class, function () {
+            return new SpladePluginRepository;
         });
 
         $this->app->singleton(TransformerRepository::class, function () {

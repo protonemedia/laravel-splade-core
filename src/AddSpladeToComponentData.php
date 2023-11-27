@@ -5,6 +5,7 @@ namespace ProtoneMedia\SpladeCore;
 use Illuminate\View\AnonymousComponent;
 use Illuminate\View\Component;
 use Illuminate\View\View;
+use ProtoneMedia\SpladeCore\Facades\SpladePlugin;
 
 class AddSpladeToComponentData
 {
@@ -18,8 +19,12 @@ class AddSpladeToComponentData
         $componentHelper = app(ComponentHelper::class);
 
         $viewContents = $componentHelper->filesystem->get(
-            $componentHelper->getPath($view)
+            $path = $componentHelper->getPath($view)
         );
+
+        if (SpladePlugin::bladeComponentIsProvidedByPlugin($component)) {
+            SpladePlugin::dontGenerateVueComponentForPath($path);
+        }
 
         if (! str_starts_with(trim($viewContents), '<script setup')) {
             // No Vue 3 script setup, so no need to add the Splade bridge.

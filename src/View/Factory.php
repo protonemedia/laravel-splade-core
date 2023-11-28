@@ -57,7 +57,7 @@ class Factory extends BaseFactory
             // prevent leaking the full path
             $path = Str::after($trace[0]['file'], base_path());
 
-            $hash = md5($path.'.'.$trace[0]['line']);
+            $hash = md5($path.'.'.$trace[0]['line'].json_encode($data));
 
             (new AddSpladeToComponentData)($component, $data, $hash, $view);
         }

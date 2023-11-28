@@ -22,7 +22,7 @@ class AddSpladeToComponentData
             $path = $componentHelper->getPath($view)
         );
 
-        if (SpladePlugin::bladeComponentIsProvidedByPlugin($component)) {
+        if (SpladePlugin::bladeComponentIsProvidedByPlugin($component) && ! SpladePlugin::componentIsOnWorkbench($component)) {
             SpladePlugin::dontGenerateVueComponentForPath($path);
         }
 

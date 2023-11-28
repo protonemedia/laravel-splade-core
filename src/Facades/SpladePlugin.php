@@ -9,6 +9,8 @@ use ProtoneMedia\SpladeCore\SpladePluginRepository;
 
 /**
  * @method static void registerPluginProvider(SpladePluginProvider $provider)
+ * @method static void putComponentsOnWorkbench(array $components)
+ * @method static bool componentIsOnWorkbench(string|Component $components)
  * @method static bool bladeComponentIsProvidedByPlugin(string|Component $component)
  * @method static void dontGenerateVueComponentForPath(string $path)
  * @method static bool shouldGenerateVueComponentForPath(string $path)

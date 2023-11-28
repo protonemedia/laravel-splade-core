@@ -20,6 +20,11 @@ class SpladePluginRepository
     /**
      * @var string[]
      */
+    private array $componentsOnWorkbench = [];
+
+    /**
+     * @var string[]
+     */
     private array $dontGenerateVueComponentForPaths = [];
 
     /**
@@ -42,6 +47,28 @@ class SpladePluginRepository
         $componentClass = is_string($component) ? $component : get_class($component);
 
         return array_key_exists($componentClass, $this->bladeComponents);
+    }
+
+    /**
+     * Put the given components on the workbench.
+     *
+     * @param  array<array-key, class-string>  $components
+     */
+    public function putComponentsOnWorkbench(array $components): void
+    {
+        foreach ($components as $component) {
+            $this->componentsOnWorkbench[$component] = true;
+        }
+    }
+
+    /**
+     * Returns a boolean indicating if the given component is on the workbench.
+     */
+    public function componentIsOnWorkbench(string|Component $component): bool
+    {
+        $componentClass = is_string($component) ? $component : get_class($component);
+
+        return array_key_exists($componentClass, $this->componentsOnWorkbench);
     }
 
     /**

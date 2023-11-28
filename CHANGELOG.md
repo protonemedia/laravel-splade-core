@@ -2,6 +2,12 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 1.6.1 - 2023-11-28
+
+* Support for Workbench
+
+**Full Changelog**: https://github.com/protonemedia/laravel-splade-core/compare/1.6.0...1.6.1
+
 ## 1.6.0 - 2023-11-28
 
 * Support for plugins

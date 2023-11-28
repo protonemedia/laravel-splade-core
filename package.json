@@ -1,6 +1,6 @@
 {
   "name": "@protonemedia/laravel-splade-core",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Splade Core: Use <script setup> and all of Vue 3's magic in your Laravel Blade.",
   "private": false,
   "author": "Pascal Baljet <pascal@protone.media>",

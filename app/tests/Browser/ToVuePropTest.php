@@ -19,7 +19,7 @@ class ToVuePropTest extends DuskTestCase
                 ->assertSee('Nullable String:')
                 ->assertSee('Int: 1')
                 ->assertSee('Bool: false')
-                ->assertSee('Array: { "foo": "bar" }')
+                ->assertSee('Array: [ "foo", "bar" ]')
                 ->assertSee('Object: { "foo": "bar" }')
                 ->assertSee('Nullable Int:')
                 ->assertSee('Nullable Bool:')
@@ -27,7 +27,8 @@ class ToVuePropTest extends DuskTestCase
                 ->assertSee('Nullable Object:')
                 ->assertSee('Default Int: 1')
                 ->assertSee('Default Bool: true')
-                ->assertSee('Default Array: [ "foo" ]');
+                ->assertSee('Default Array: [ "foo" ]')
+                ->assertSee('Multiple Types: [ "foo" ]');
         });
     }
 }

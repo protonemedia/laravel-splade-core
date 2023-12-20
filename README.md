@@ -190,7 +190,15 @@ In the first above, we used the `ref` and `computed` functions from Vue's Compos
 - `computed`
 - `inject`
 - `nextTick`
+- `onActivated`
+- `onBeforeMount`
+- `onBeforeUnmount`
+- `onBeforeUpdate`
+- `onDeactivated`
+- `onErrorCaptured`
 - `onMounted`
+- `onUnmounted`
+- `onUpdated`
 - `provide`
 - `reactive`
 - `readonly`
@@ -326,9 +334,40 @@ Note that you can use `notify.loading` to check if the method is currently runni
 > [!WARNING]
 > While the original Middleware is applied to the request, you should still validate the incoming data.
 
-#### Blade Variables
+#### Pass Blade Variables as Vue Props
 
-Public properties of the Blade Component are automatically passed as Vue props. You may even update them on the frontend, and when you call a Blade Component method, the value will be updated on the backend. The only thing you have to do is add the `VueRef` attribute to the property:
+You may pass Blade variables as Vue props. This is useful if you want to pass data from the backend to the frontend. The only thing you have to do is add the `VueProp` attribute to the property:
+
+```php
+<?php
+
+namespace App\View\Components;
+
+use Illuminate\View\Component;
+use ProtoneMedia\SpladeCore\Attributes\VueProp;
+
+class UserProfile extends Component
+{
+    #[VueProp]
+    public string $defaultMessage = 'Hey there!'
+}
+```
+
+Now you may use the `defaultMessage` prop in the template and in the script tag. You don't need to specify the prop in the `props` object, as Splade Core automatically does this for you.
+
+```vue
+<script setup>
+const defaultMessageInUpperCase = props.defaultMessage.toUpperCase();
+</script>
+
+<label>Default message:</label>
+<p v-text="defaultMessage" />
+```
+
+
+#### Pass Blade Variables as Vue Refs
+
+Even more powerful than passing Blade variables as Vue Props, is passing them as Vue Refs. This way, you can use the variable as a reactive variable in the template. You may update them on the frontend, and when you call a Blade Component method, the value will be updated on the backend. The only thing you have to do is add the `VueRef` attribute to the property:
 
 ```php
 <?php

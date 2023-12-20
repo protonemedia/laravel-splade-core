@@ -1,7 +1,7 @@
 <script setup>
 import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
 import { h, ref } from 'vue'
-const props = defineProps(['spladeBridge', 'spladeTemplateId'])
+const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
 
 const form = ref({
     package: 'Splade',

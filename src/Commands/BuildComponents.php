@@ -54,6 +54,7 @@ class BuildComponents extends Command
 
                 BladeViewExtractor::from($contents, ['spladeBridge' => [
                     'data' => $componentClass ? ComponentSerializer::getDataFromComponentClass($componentClass) : [],
+                    'props' => $componentClass ? ComponentSerializer::getPropsFromComponentClass($componentClass) : [],
                     'tag' => $componentHelper->getTag($viewPath),
                     'functions' => $componentClass ? ComponentSerializer::getFunctionsFromComponentClass($componentClass) : [],
                 ]], $viewPath)->handle($filesystem);

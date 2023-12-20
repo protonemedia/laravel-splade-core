@@ -6,6 +6,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use ProtoneMedia\SpladeCore\Facades\SpladePlugin;
@@ -172,6 +173,14 @@ class BladeViewExtractor
     }
 
     /**
+     * Get the properties that are passed from the Blade Component.
+     */
+    protected function getBladePropsThatArePassedAsVueProps(): array
+    {
+        return $this->data['spladeBridge']['props'] ?? [];
+    }
+
+    /**
      * Get the 'Splade' tag of the Blade Component.
      */
     protected function getTag(): string
@@ -291,7 +300,16 @@ class BladeViewExtractor
      */
     protected function extractDefinePropsFromScript(): array
     {
+        $bladePropsAsVueProps = Collection::make($this->getBladePropsThatArePassedAsVueProps())
+            ->map(function (object $specs) {
+                $type = is_array($specs->type) ? '['.implode(',', $specs->type).']' : "{$specs->type}";
+                $default = Js::from($specs->default)->toHtml();
+
+                return "{type: {$type}, default: {$default}}";
+            });
+
         $defaultProps = Collection::make(['spladeTemplateId' => 'String'])
+            ->merge($bladePropsAsVueProps)
             ->when($this->isComponent(), fn (Collection $collection) => $collection->prepend('Object', 'spladeBridge'))
             ->when($this->viewUsesVModel(), fn (Collection $collection) => $collection->put('modelValue', '{}'));
 

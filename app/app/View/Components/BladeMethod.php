@@ -5,11 +5,11 @@ namespace App\View\Components;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
-use ProtoneMedia\SpladeCore\Attributes\Vue;
+use ProtoneMedia\SpladeCore\Attributes\VueRef;
 
 class BladeMethod extends Component
 {
-    #[Vue]
+    #[VueRef]
     public function execute(string $input)
     {
         file_put_contents(
@@ -20,7 +20,7 @@ class BladeMethod extends Component
         return $input;
     }
 
-    #[Vue]
+    #[VueRef]
     public function sleep()
     {
         sleep(2);

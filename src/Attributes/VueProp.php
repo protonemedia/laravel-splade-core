@@ -3,6 +3,6 @@
 namespace ProtoneMedia\SpladeCore\Attributes;
 
 #[Attribute]
-class Vue
+class VueProp
 {
 }

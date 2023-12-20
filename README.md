@@ -292,7 +292,7 @@ Note that you can use `props.modelValue` without defining it. Splade Core automa
 
 ### Calling methods on the Blade Component
 
-If your Blade Component has a `public` method, you may call it from the template, either in the script or in the template. Splade Core detects the HTTP Middleware of the current page and applies it to subsequent requests. The only thing you have to do is add the `VueRef` attribute to the method:
+If your Blade Component has a `public` method, you may call it from the template, either in the script or in the template. Splade Core detects the HTTP Middleware of the current page and applies it to subsequent requests. The only thing you have to do is add the `Vue` attribute to the method:
 
 ```php
 <?php
@@ -300,11 +300,11 @@ If your Blade Component has a `public` method, you may call it from the template
 namespace App\View\Components;
 
 use Illuminate\View\Component;
-use ProtoneMedia\SpladeCore\Attributes\VueRef;
+use ProtoneMedia\SpladeCore\Attributes\Vue;
 
 class UserProfile extends Component
 {
-    #[VueRef]
+    #[Vue]
     public function notify(string $message)
     {
         auth()->user()->notify($message);
@@ -382,6 +382,7 @@ class UserProfile extends Component
     #[VueRef]
     public string $notification = 'Hey there!'
 
+    #[Vue]
     public function notify()
     {
         auth()->user()->notify($this->notification);

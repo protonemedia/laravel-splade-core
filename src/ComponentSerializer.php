@@ -8,6 +8,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 use JsonSerializable;
+use ProtoneMedia\SpladeCore\Attributes\Vue;
 use ProtoneMedia\SpladeCore\Attributes\VueProp;
 use ProtoneMedia\SpladeCore\Attributes\VueRef;
 use ReflectionClass;
@@ -310,7 +311,7 @@ class ComponentSerializer implements Arrayable
         return Collection::make($functions)
             ->reject(fn ($function) => in_array($function->getName(), $ignoredFunctions))
             ->reject(fn (ReflectionMethod $function) => $function->isStatic())
-            ->reject(fn (ReflectionMethod $function) => empty($function->getAttributes(VueRef::class)))
+            ->reject(fn (ReflectionMethod $function) => empty($function->getAttributes(Vue::class)))
             ->map(fn ($function) => $function->getName())
             ->values()
             ->all();

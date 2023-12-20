@@ -230,7 +230,9 @@ class ComponentSerializer implements Arrayable
                 continue;
             }
 
-            $value = $property->isInitialized($this->component) ? $property->getValue($this->component) : null;
+            $value = $property->isInitialized($this->component)
+                ? $property->getValue($this->component)
+                : null;
 
             if ($value instanceof Model) {
                 $value = (object) $value->jsonSerialize();
@@ -250,9 +252,12 @@ class ComponentSerializer implements Arrayable
                 $value = $value->jsonSerialize();
             }
 
-            $defaultValue = $property->getDefaultValue();
+            $defaultValue = $property->hasDefaultValue()
+                ? $property->getDefaultValue()
+                : null;
 
-            $constructorParameter = collect($constructorParameters)->first(fn ($parameter) => $parameter->getName() === $name);
+            $constructorParameter = collect($constructorParameters)
+                ->first(fn ($parameter) => $parameter->getName() === $name);
 
             if ($constructorParameter?->isDefaultValueAvailable()) {
                 $defaultValue = $constructorParameter->getDefaultValue();
@@ -271,13 +276,17 @@ class ComponentSerializer implements Arrayable
     /**
      * Maps a PHP type to a Vue type.
      */
-    public static function mapTypeToVueType(?ReflectionType $type = null): array|string
+    public static function mapTypeToVueType(?ReflectionType $type = null): array|string|null
     {
         if ($type instanceof \ReflectionUnionType) {
-            return collect($type->getTypes())->map(fn ($type) => static::mapTypeToVueType($type))->all();
+            $types = collect($type->getTypes())
+                ->map(fn ($type = null) => static::mapTypeToVueType($type))
+                ->filter();
+
+            return $types->isEmpty() ? null : $types->all();
         }
 
-        return match ($type->getName()) {
+        return match ($type?->getName()) {
             'bool' => 'Boolean',
             'int' => 'Number',
             'float' => 'Number',
@@ -285,8 +294,7 @@ class ComponentSerializer implements Arrayable
             'array' => 'Array',
             'object' => 'Object',
             'null' => 'Null',
-            'mixed' => 'Any',
-            default => 'Any',
+            default => null,
         };
     }
 

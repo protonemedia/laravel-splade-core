@@ -1,6 +1,6 @@
 <script setup>
 import { h, ref } from 'vue'
-const props = defineProps(['spladeTemplateId'])
+const props = defineProps({ spladeTemplateId: String })
 
 const message = ref('Hello World!')
 

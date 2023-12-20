@@ -79,6 +79,28 @@ class ScriptParser
     }
 
     /**
+     * Maps the props array to a Vue props object.
+     */
+    private function toPropsObjectDefinition(array|Collection $props): string
+    {
+        return Collection::make($props)
+            ->map(function (string $value, string $key) {
+                if (Str::camel($key) !== $key) {
+                    $key = "'{$key}'";
+                }
+
+                if (! $value) {
+                    return "{$key}: {}";
+                }
+
+                $value = trim(str_replace(["\n", "\t"], '', $value));
+
+                return "{$key}: {$value}";
+            })
+            ->implode(', ');
+    }
+
+    /**
      * Returns the defineProps() call expression and additionally merges
      * the given props with the ones that are defined in the script.
      */
@@ -94,18 +116,16 @@ class ScriptParser
                 ->implode(PHP_EOL);
 
             $firstArgument = $node->getArguments()[0] ?? null;
-            $newFirstArgument = '';
+            $newPropsObject = '{}';
 
             if ($firstArgument instanceof ArrayExpression) {
                 $props = collect($firstArgument->getElements())
                     ->map(fn (StringLiteral $element) => $element->getValue())
-                    ->values()
-                    ->merge(array_keys($mergeWith))
-                    ->unique()
-                    ->map(fn (string $prop) => "'{$prop}'")
-                    ->implode(', ');
+                    ->mapWithKeys(fn (string $prop) => [$prop => ''])
+                    ->merge($mergeWith)
+                    ->pipe(fn (Collection $props) => $this->toPropsObjectDefinition($props));
 
-                $newFirstArgument = "[{$props}]";
+                $newPropsObject = "{{$props}}";
             } elseif ($firstArgument instanceof ObjectExpression) {
                 $props = collect($firstArgument->getProperties())
                     ->mapWithKeys(function (Property $property) {
@@ -124,30 +144,22 @@ class ScriptParser
 
                 $props = Collection::make($mergeWith)
                     ->merge($props)
-                    ->map(function (string $value, string $key) {
-                        $value = trim(str_replace(["\n", "\t"], '', $value));
+                    ->pipe(fn (Collection $props) => $this->toPropsObjectDefinition($props));
 
-                        return "{$key}: {$value}";
-                    })
-                    ->values()
-                    ->implode(', ');
-
-                $newFirstArgument = "{{$props}}";
+                $newPropsObject = "{{$props}}";
             }
 
             return [
                 'original' => trim($definePropsScript),
-                'new' => "const props = defineProps({$newFirstArgument});",
+                'new' => "const props = defineProps({$newPropsObject});",
             ];
         }
 
-        $keys = Collection::make($mergeWith)->keys()->map(
-            fn (string $prop) => "'{$prop}'"
-        )->implode(',');
+        $keys = $this->toPropsObjectDefinition($mergeWith);
 
         return [
             'original' => '',
-            'new' => 'const props = defineProps(['.$keys.']);',
+            'new' => 'const props = defineProps({'.$keys.'});',
         ];
     }
 

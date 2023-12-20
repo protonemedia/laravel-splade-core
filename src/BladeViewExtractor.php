@@ -305,7 +305,9 @@ class BladeViewExtractor
                 $type = is_array($specs->type) ? '['.implode(',', $specs->type).']' : "{$specs->type}";
                 $default = Js::from($specs->default)->toHtml();
 
-                return "{type: {$type}, default: {$default}}";
+                return $type
+                    ? "{type: {$type}, default: {$default}}"
+                    : "{default: {$default}}";
             });
 
         $defaultProps = Collection::make(['spladeTemplateId' => 'String'])

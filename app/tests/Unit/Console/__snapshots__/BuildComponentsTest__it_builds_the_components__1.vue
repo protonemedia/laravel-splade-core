@@ -1,7 +1,7 @@
 <script setup>
 import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
 import { computed, h, ref } from 'vue'
-const props = defineProps(['spladeBridge', 'spladeTemplateId'])
+const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
 
 const message = ref('Hello Vue!')
 const reversed = computed(() => message.value.split('').reverse().join(''))

@@ -1,7 +1,7 @@
 <script setup>
 import { BladeComponent, GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
 import { h, inject, ref } from 'vue'
-const props = defineProps(['spladeBridge', 'spladeTemplateId'])
+const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
 const _spladeBridgeState = ref(props.spladeBridge)
 const _spladeTemplateBus = inject('$spladeTemplateBus')
 const refreshComponent = BladeComponent.asyncRefreshComponent(_spladeBridgeState, _spladeTemplateBus)

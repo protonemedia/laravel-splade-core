@@ -1,7 +1,7 @@
 <script setup>
 import { BladeComponent, GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
 import { computed, h, ref } from 'vue'
-const props = defineProps(['spladeBridge', 'spladeTemplateId'])
+const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
 const _spladeBridgeState = ref(props.spladeBridge)
 const setMessage = BladeComponent.asyncComponentMethod('setMessage', _spladeBridgeState)
 const message = computed({

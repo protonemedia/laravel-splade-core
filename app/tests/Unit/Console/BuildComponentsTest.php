@@ -31,6 +31,7 @@ class BuildComponentsTest extends TestCase
             'ComponentTwoWayBinding',
             'IncludedView',
             'RegularView',
+            'ComponentToVueProp',
         ] as $component) {
             $this->assertFileExists(resource_path('js/splade/Splade'.$component.'.vue'));
             $this->assertMatchesVueSnapshot($filesytem->get(resource_path('js/splade/Splade'.$component.'.vue')));

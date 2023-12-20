@@ -2,6 +2,16 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 2.0.0 - 2023-12-20
+
+### Splade Core v2.0
+
+Splade Core v2 focuses on improving data passing from Blade to Vue. In addition to passing Blade props as a Vue ref, you may now pass them as a Vue prop. Also, it translates PHP types to their JavaScript equivalents in the Vue props definition.
+
+#### Upgrading from 1.x to 2.x
+
+The only breaking change is that the `Vue` attribute has been split into `Vue`, `VueProp`, and `VueRef`. The Vue attribute can still be used for methods. You may now use either `VueProp` or `VueRef` to pass PHP properties to Vue. `VueProp` is a one-way binding, while `VueRef` is a two-way binding. Previously, two-way binding was the only option.
+
 ## 1.6.3 - 2023-11-28
 
 Added `SpladePluginServiceProvider`

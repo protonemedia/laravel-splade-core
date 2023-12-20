@@ -5,17 +5,17 @@ namespace App\View\Components;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
-use ProtoneMedia\SpladeCore\Attributes\Vue;
+use ProtoneMedia\SpladeCore\Attributes\VueRef;
 
 class BladeMethodCallbacks extends Component
 {
-    #[Vue]
+    #[VueRef]
     public function execute()
     {
         sleep(2);
     }
 
-    #[Vue]
+    #[VueRef]
     public function fail()
     {
         abort(500);

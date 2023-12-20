@@ -14,7 +14,7 @@ class ScriptParserTest extends TestCase
 
         $this->assertEquals([
             'original' => '',
-            'new' => "const props = defineProps(['foo']);",
+            'new' => 'const props = defineProps({foo: String});',
         ], $parser->getDefineProps([
             'foo' => 'String',
         ]));
@@ -31,7 +31,7 @@ JS;
 
         $this->assertEquals([
             'original' => "defineProps(['foo', 'bar']);",
-            'new' => "const props = defineProps(['foo', 'bar']);",
+            'new' => 'const props = defineProps({foo: {}, bar: {}});',
         ], $parser->getDefineProps());
     }
 
@@ -46,7 +46,7 @@ JS;
 
         $this->assertEquals([
             'original' => "const props = defineProps(['foo', 'bar']);",
-            'new' => "const props = defineProps(['foo', 'bar']);",
+            'new' => 'const props = defineProps({foo: {}, bar: {}});',
         ], $parser->getDefineProps());
     }
 
@@ -61,7 +61,7 @@ JS;
 
         $this->assertEquals([
             'original' => "defineProps(['foo', 'bar']);",
-            'new' => "const props = defineProps(['foo', 'bar', 'baz']);",
+            'new' => 'const props = defineProps({foo: {}, bar: {}, baz: String});',
         ], $parser->getDefineProps([
             'baz' => 'String',
         ]));

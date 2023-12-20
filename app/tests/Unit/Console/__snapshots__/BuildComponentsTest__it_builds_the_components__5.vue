@@ -1,7 +1,7 @@
 <script setup>
 import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
 import { h, onMounted } from 'vue'
-const props = defineProps(['spladeBridge', 'spladeTemplateId', 'modelValue'])
+const props = defineProps({ spladeBridge: Object, spladeTemplateId: String, modelValue: {} })
 const $refs = {}
 const setSpladeRef = (key, value) => ($refs[key] = value)
 

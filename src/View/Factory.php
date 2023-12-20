@@ -109,6 +109,7 @@ class Factory extends BaseFactory
             return parent::renderComponent();
         }
 
+        /** @var ComponentAttributeBag */
         $attributes = $componentData['attributes'];
 
         $this->componentData[$this->currentComponent()]['attributes'] = new ComponentAttributeBag;
@@ -124,6 +125,14 @@ class Factory extends BaseFactory
         $this->pushSpladeTemplate($templateId, $output);
 
         $spladeBridge = Js::from($componentData['spladeBridge'])->toHtml();
+
+        collect($componentData['spladeBridge']['props'])->each(function ($specs, $key) use ($attributes) {
+            if (! str_starts_with($key, 'v-bind:')) {
+                $key = 'v-bind:'.Str::kebab($key);
+            }
+
+            $attributes[$key] = Js::from($specs->value)->toHtml();
+        });
 
         $attrs = $attributes->toHtml();
 

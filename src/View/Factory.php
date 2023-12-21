@@ -2,12 +2,14 @@
 
 namespace ProtoneMedia\SpladeCore\View;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 use Illuminate\View\ComponentAttributeBag;
 use Illuminate\View\Factory as BaseFactory;
 use ProtoneMedia\SpladeCore\AddSpladeToComponentData;
+use ProtoneMedia\SpladeCore\ResolveOnce;
 
 class Factory extends BaseFactory
 {
@@ -151,12 +153,24 @@ class Factory extends BaseFactory
         $this->pushSpladeTemplate($templateId, $output);
 
         foreach (['data', 'props', 'functions'] as $key) {
-            if (is_callable($spladeBridge[$key])) {
+            if ($spladeBridge[$key] instanceof ResolveOnce) {
                 $spladeBridge[$key] = $spladeBridge[$key]();
             }
         }
 
-        $spladeBridgeHtml = Js::from($spladeBridge)->toHtml();
+        $spladeBridgeHtml = Js::from(Arr::only($spladeBridge, [
+            'instance',
+            'invoke_url',
+            'original_url',
+            'original_verb',
+            'signature',
+            'tag',
+            'template_hash',
+            'data',
+            // 'props',
+            // 'functions',
+            // 'response',
+        ]))->toHtml();
 
         collect($spladeBridge['props'])->each(function ($specs, $key) use ($attributes) {
             if (! str_starts_with($key, 'v-bind:')) {

@@ -11,6 +11,8 @@ use ProtoneMedia\SpladeCore\AddSpladeToComponentData;
 
 class Factory extends BaseFactory
 {
+    const REQUIRED_JSON_FLAGS = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_THROW_ON_ERROR;
+
     /**
      * Whether to track Splade components.
      */
@@ -94,6 +96,28 @@ class Factory extends BaseFactory
     }
 
     /**
+     * Convert the given JSON to a JavaScript expression.
+     *
+     * @param  string  $json
+     * @param  int  $flags
+     * @return string
+     *
+     * @throws \JsonException
+     */
+    public static function convertJsonToJavaScriptExpression($json, $flags = 0)
+    {
+        if ($json === '[]' || $json === '{}') {
+            return $json;
+        }
+
+        if (Str::startsWith($json, ['"', '{', '['])) {
+            return "JSON.parse('".substr(json_encode($json, $flags | static::REQUIRED_JSON_FLAGS), 1, -1)."')";
+        }
+
+        return $json;
+    }
+
+    /**
      * Temporarily store the passed attributes, render the component and
      * push it to the Splade templates stack. Then return a generic Vue
      * component that will grab the template from the stack.
@@ -139,7 +163,9 @@ class Factory extends BaseFactory
                 $key = 'v-bind:'.Str::kebab($key);
             }
 
-            $attributes[$key] = Js::from($specs->value)->toHtml();
+            $attributes[$key] = $specs->raw
+                ? static::convertJsonToJavaScriptExpression($specs->value)
+                : Js::from($specs->value)->toHtml();
         });
 
         $attrs = $attributes->toHtml();

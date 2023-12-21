@@ -21,6 +21,7 @@ const props = defineProps({
     defaultArray: { type: Array, default: JSON.parse('[\u0022foo\u0022]') },
     multipleTypes: { type: [Array, String, Boolean], default: JSON.parse('[\u0022foo\u0022]') },
     renamed: { type: String, default: 'renamed-foo' },
+    json: { default: JSON.parse('{\u0022foo\u0022:\u0022bar\u0022}') },
     dataFromMethod: { type: Array, default: null },
 })
 const spladeRender = h({

@@ -2,6 +2,10 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 2.2.1 - 2023-12-21
+
+* Further SpladeBridge improvements
+
 ## 2.2.0 - 2023-12-21
 
 * Introduces the `VuePropRaw` property so you can pass a raw JSON string to the Vue component
@@ -21,6 +25,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 
 

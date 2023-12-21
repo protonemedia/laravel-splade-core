@@ -161,7 +161,13 @@ class BladeViewExtractor
      */
     protected function getBladeFunctions(): array
     {
-        return $this->data['spladeBridge']['functions'] ?? [];
+        $functions = $this->data['spladeBridge']['functions'] ?? [];
+
+        if ($functions instanceof ResolveOnce) {
+            $functions = $functions();
+        }
+
+        return $functions;
     }
 
     /**
@@ -169,7 +175,13 @@ class BladeViewExtractor
      */
     protected function getBladeProperties(): array
     {
-        return array_keys($this->data['spladeBridge']['data'] ?? []);
+        $data = $this->data['spladeBridge']['data'] ?? [];
+
+        if ($data instanceof ResolveOnce) {
+            $data = $data();
+        }
+
+        return array_keys($data);
     }
 
     /**
@@ -177,7 +189,13 @@ class BladeViewExtractor
      */
     protected function getBladePropsThatArePassedAsVueProps(): array
     {
-        return $this->data['spladeBridge']['props'] ?? [];
+        $props = $this->data['spladeBridge']['props'] ?? [];
+
+        if ($props instanceof ResolveOnce) {
+            $props = $props();
+        }
+
+        return $props;
     }
 
     /**

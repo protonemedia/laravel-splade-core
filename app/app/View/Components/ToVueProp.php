@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 use ProtoneMedia\SpladeCore\Attributes\VueProp;
+use Psr\SimpleCache\CacheInterface;
 
 class ToVueProp extends Component
 {
@@ -37,7 +38,14 @@ class ToVueProp extends Component
         #[VueProp] public bool $defaultBool = true,
         #[VueProp] public array $defaultArray = ['foo'],
         #[VueProp] public array|bool|string $multipleTypes = ['foo'],
+        #[VueProp(as: 'renamed')] public string $name = 'renamed-foo',
     ) {
+    }
+
+    #[VueProp]
+    public function dataFromMethod(CacheInterface $cache): array
+    {
+        return ['foo', 'bar', 'baz'];
     }
 
     /**

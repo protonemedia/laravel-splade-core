@@ -20,6 +20,8 @@ const props = defineProps({
     defaultBool: { type: Boolean, default: true },
     defaultArray: { type: Array, default: JSON.parse('[\u0022foo\u0022]') },
     multipleTypes: { type: [Array, String, Boolean], default: JSON.parse('[\u0022foo\u0022]') },
+    renamed: { type: String, default: 'renamed-foo' },
+    dataFromMethod: { type: Array, default: null },
 })
 const spladeRender = h({
     name: 'SpladeComponentToVuePropRender',

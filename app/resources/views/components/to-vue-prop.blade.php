@@ -16,4 +16,6 @@
 <p>Default Bool: <span v-text="defaultBool" /></p>
 <p>Default Array: <span v-text="defaultArray" /></p>
 <p>Multiple Types: <span v-text="multipleTypes" /></p>
+<p>Data From Method: <span v-text="dataFromMethod" /></p>
+<p>Renamed: <span v-text="renamed" /></p>
 </div>

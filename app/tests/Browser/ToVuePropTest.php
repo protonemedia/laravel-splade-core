@@ -28,7 +28,9 @@ class ToVuePropTest extends DuskTestCase
                 ->assertSee('Default Int: 1')
                 ->assertSee('Default Bool: true')
                 ->assertSee('Default Array: [ "foo" ]')
-                ->assertSee('Multiple Types: [ "foo" ]');
+                ->assertSee('Multiple Types: [ "foo" ]')
+                ->assertSee('Data From Method: [ "foo", "bar", "baz" ]')
+                ->assertSee('Renamed: renamed-foo');
         });
     }
 }

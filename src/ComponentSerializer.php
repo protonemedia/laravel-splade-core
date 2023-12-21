@@ -2,6 +2,7 @@
 
 namespace ProtoneMedia\SpladeCore;
 
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -168,10 +169,11 @@ class ComponentSerializer implements Arrayable
      */
     public static function getPropsFromComponentClass(string $componentClass): array
     {
+        $values = [];
+
+        // From Properties...
         $properties = (new ReflectionClass($componentClass))->getProperties();
         $constructorParameters = (new ReflectionClass($componentClass))->getConstructor()?->getParameters();
-
-        $values = [];
 
         foreach ($properties as $property) {
             if ($property->isStatic() || ! $property->isPublic()) {
@@ -184,9 +186,11 @@ class ComponentSerializer implements Arrayable
                 continue;
             }
 
-            if (empty($property->getAttributes(VueProp::class))) {
+            if (empty($vuePropAttributes = $property->getAttributes(VueProp::class))) {
                 continue;
             }
+
+            $as = $vuePropAttributes[0]->getArguments()['as'] ?? $name;
 
             $defaultValue = $property->getDefaultValue();
 
@@ -196,9 +200,37 @@ class ComponentSerializer implements Arrayable
                 $defaultValue = $constructorParameter->getDefaultValue();
             }
 
-            $values[$name] = (object) [
+            $values[$as] = (object) [
                 'default' => $defaultValue,
                 'type' => static::mapTypeToVueType($property->getType()),
+                'value' => null,
+            ];
+        }
+
+        // From Methods...
+        $methods = (new ReflectionClass($componentClass))->getMethods(ReflectionMethod::IS_PUBLIC);
+        $ignoredFunctions = IgnoredComponentFunctions::get();
+
+        foreach ($methods as $method) {
+            if ($method->isStatic()) {
+                continue;
+            }
+
+            $name = $method->getName();
+
+            if (in_array($name, $ignoredFunctions)) {
+                continue;
+            }
+
+            if (empty($vuePropAttributes = $method->getAttributes(VueProp::class))) {
+                continue;
+            }
+
+            $as = $vuePropAttributes[0]->getArguments()['as'] ?? $name;
+
+            $values[$as] = (object) [
+                'default' => null,
+                'type' => static::mapTypeToVueType($method->getReturnType()),
                 'value' => null,
             ];
         }
@@ -211,10 +243,11 @@ class ComponentSerializer implements Arrayable
      */
     public function getPropsFromComponent(): array
     {
+        $values = [];
+
+        // From Properties...
         $properties = (new ReflectionClass($this->component))->getProperties();
         $constructorParameters = (new ReflectionClass($this->component))->getConstructor()?->getParameters();
-
-        $values = [];
 
         foreach ($properties as $property) {
             if ($property->isStatic() || ! $property->isPublic()) {
@@ -227,9 +260,11 @@ class ComponentSerializer implements Arrayable
                 continue;
             }
 
-            if (empty($property->getAttributes(VueProp::class))) {
+            if (empty($vuePropAttributes = $property->getAttributes(VueProp::class))) {
                 continue;
             }
+
+            $as = $vuePropAttributes[0]->getArguments()['as'] ?? $name;
 
             $value = $property->isInitialized($this->component)
                 ? $property->getValue($this->component)
@@ -264,10 +299,38 @@ class ComponentSerializer implements Arrayable
                 $defaultValue = $constructorParameter->getDefaultValue();
             }
 
-            $values[$name] = (object) [
+            $values[$as] = (object) [
                 'default' => $defaultValue,
                 'type' => static::mapTypeToVueType($property->getType()),
                 'value' => $this->getSerializedPropertyValue($value),
+            ];
+        }
+
+        // From Methods...
+        $methods = (new ReflectionClass($this->component))->getMethods(ReflectionMethod::IS_PUBLIC);
+        $ignoredFunctions = IgnoredComponentFunctions::get();
+
+        foreach ($methods as $method) {
+            if ($method->isStatic()) {
+                continue;
+            }
+
+            $name = $method->getName();
+
+            if (in_array($name, $ignoredFunctions)) {
+                continue;
+            }
+
+            if (empty($vuePropAttributes = $method->getAttributes(VueProp::class))) {
+                continue;
+            }
+
+            $as = $vuePropAttributes[0]->getArguments()['as'] ?? $name;
+
+            $values[$as] = (object) [
+                'default' => null,
+                'type' => static::mapTypeToVueType($method->getReturnType()),
+                'value' => Container::getInstance()->call([$this->component, $name]),
             ];
         }
 
@@ -277,7 +340,7 @@ class ComponentSerializer implements Arrayable
     /**
      * Maps a PHP type to a Vue type.
      */
-    public static function mapTypeToVueType(?ReflectionType $type = null): array|string|null
+    public static function mapTypeToVueType(ReflectionType $type = null): array|string|null
     {
         if ($type instanceof \ReflectionUnionType) {
             $types = collect($type->getTypes())

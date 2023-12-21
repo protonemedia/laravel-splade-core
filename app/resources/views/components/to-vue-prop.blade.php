@@ -18,5 +18,5 @@
 <p>Multiple Types: <span v-text="multipleTypes" /> (<span v-text="typeof multipleTypes" />)</p>
 <p>Data From Method: <span v-text="dataFromMethod" /> (<span v-text="typeof dataFromMethod" />)</p>
 <p>Renamed: <span v-text="renamed" /> (<span v-text="typeof renamed" />)</p>
-<p>JSON: <span v-text="json" /> (<span v-text="typeof json" />)</p>
+<p>JS Object: <span v-text="jsObject" /> (<span v-text="typeof jsObject" />)</p>
 </div>

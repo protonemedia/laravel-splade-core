@@ -13,6 +13,7 @@ use ProtoneMedia\SpladeCore\Attributes\Vue;
 use ProtoneMedia\SpladeCore\Attributes\VueProp;
 use ProtoneMedia\SpladeCore\Attributes\VuePropRaw;
 use ProtoneMedia\SpladeCore\Attributes\VueRef;
+use ProtoneMedia\SpladeCore\Facades\Transformer;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
@@ -84,6 +85,34 @@ class ComponentSerializer implements Arrayable
     }
 
     /**
+     * Transforms a Blade Component prop.
+     */
+    private function transformValue(mixed $value): mixed
+    {
+        $value = Transformer::handle($value);
+
+        if ($value instanceof Model) {
+            return (object) $value->jsonSerialize();
+        }
+
+        if ($value instanceof Collection) {
+            return $value->map(function ($item) {
+                if ($item instanceof Model) {
+                    return (object) $item->jsonSerialize();
+                }
+
+                return $item;
+            })->jsonSerialize();
+        }
+
+        if ($value instanceof JsonSerializable) {
+            return $value->jsonSerialize();
+        }
+
+        return $value;
+    }
+
+    /**
      * Gathers all data that will be two-way bound to the Vue component.
      */
     public function getDataFromProperties(): array
@@ -107,27 +136,9 @@ class ComponentSerializer implements Arrayable
                 continue;
             }
 
-            $value = $property->getValue($this->component);
-
-            if ($value instanceof Model) {
-                $value = (object) $value->jsonSerialize();
-            }
-
-            if ($value instanceof Collection) {
-                $value = $value->map(function ($item) {
-                    if ($item instanceof Model) {
-                        return (object) $item->jsonSerialize();
-                    }
-
-                    return $item;
-                })->jsonSerialize();
-            }
-
-            if ($value instanceof JsonSerializable) {
-                $value = $value->jsonSerialize();
-            }
-
-            $values[$name] = $this->getSerializedPropertyValue($value);
+            $values[$name] = $this->getSerializedPropertyValue(
+                $property->getValue($this->component)
+            );
         }
 
         return $values;
@@ -192,7 +203,6 @@ class ComponentSerializer implements Arrayable
 
         // From Properties...
         $properties = (new ReflectionClass($componentClass))->getProperties();
-        $constructorParameters = (new ReflectionClass($componentClass))->getConstructor()?->getParameters();
 
         foreach ($properties as $property) {
             if ($property->isStatic() || ! $property->isPublic()) {
@@ -213,16 +223,7 @@ class ComponentSerializer implements Arrayable
 
             $as = $vuePropAttribute->getArguments()['as'] ?? $name;
 
-            $defaultValue = $property->getDefaultValue();
-
-            $constructorParameter = collect($constructorParameters)->first(fn ($parameter) => $parameter->getName() === $name);
-
-            if ($constructorParameter?->isDefaultValueAvailable()) {
-                $defaultValue = $constructorParameter->getDefaultValue();
-            }
-
             $values[$as] = (object) [
-                'default' => $defaultValue,
                 'raw' => $vuePropAttribute->getName() === VuePropRaw::class,
                 'type' => static::mapTypeToVueType($property->getType()),
                 'value' => null,
@@ -253,7 +254,6 @@ class ComponentSerializer implements Arrayable
             $as = $vuePropAttribute->getArguments()['as'] ?? $name;
 
             $values[$as] = (object) [
-                'default' => null,
                 'raw' => $vuePropAttribute->getName() === VuePropRaw::class,
                 'type' => static::mapTypeToVueType($method->getReturnType()),
                 'value' => null,
@@ -264,7 +264,7 @@ class ComponentSerializer implements Arrayable
     }
 
     /**
-     * Returns all public props from the component class.
+     * Returns all public props from the component class (one-way bound).
      */
     public function getPropsFromComponent(): array
     {
@@ -272,7 +272,6 @@ class ComponentSerializer implements Arrayable
 
         // From Properties...
         $properties = (new ReflectionClass($this->component))->getProperties();
-        $constructorParameters = (new ReflectionClass($this->component))->getConstructor()?->getParameters();
 
         foreach ($properties as $property) {
             if ($property->isStatic() || ! $property->isPublic()) {
@@ -297,40 +296,10 @@ class ComponentSerializer implements Arrayable
                 ? $property->getValue($this->component)
                 : null;
 
-            if ($value instanceof Model) {
-                $value = (object) $value->jsonSerialize();
-            }
-
-            if ($value instanceof Collection) {
-                $value = $value->map(function ($item) {
-                    if ($item instanceof Model) {
-                        return (object) $item->jsonSerialize();
-                    }
-
-                    return $item;
-                })->jsonSerialize();
-            }
-
-            if ($value instanceof JsonSerializable) {
-                $value = $value->jsonSerialize();
-            }
-
-            $defaultValue = $property->hasDefaultValue()
-                ? $property->getDefaultValue()
-                : null;
-
-            $constructorParameter = collect($constructorParameters)
-                ->first(fn ($parameter) => $parameter->getName() === $name);
-
-            if ($constructorParameter?->isDefaultValueAvailable()) {
-                $defaultValue = $constructorParameter->getDefaultValue();
-            }
-
             $values[$as] = (object) [
-                'default' => $defaultValue,
                 'raw' => $vuePropAttribute->getName() === VuePropRaw::class,
                 'type' => static::mapTypeToVueType($property->getType()),
-                'value' => $this->getSerializedPropertyValue($value),
+                'value' => $this->getSerializedPropertyValue($this->transformValue($value)),
             ];
         }
 
@@ -358,7 +327,6 @@ class ComponentSerializer implements Arrayable
             $as = $vuePropAttribute->getArguments()['as'] ?? $name;
 
             $values[$as] = (object) [
-                'default' => null,
                 'raw' => $vuePropAttribute->getName() === VuePropRaw::class,
                 'type' => static::mapTypeToVueType($method->getReturnType()),
                 'value' => Container::getInstance()->call([$this->component, $name]),

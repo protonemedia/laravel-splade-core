@@ -2,6 +2,10 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 2.1.1 - 2023-12-21
+
+* Improves resolving Component data
+
 ## 2.1.0 - 2023-12-21
 
 * Support for renaming props: `#[VueProp(as: 'renamed')]`
@@ -13,6 +17,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 ```
 ## 2.0.0 - 2023-12-20

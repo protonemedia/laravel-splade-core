@@ -6,11 +6,9 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use ProtoneMedia\SpladeCore\Facades\SpladePlugin;
-use ProtoneMedia\SpladeCore\View\Factory;
 
 class BladeViewExtractor
 {
@@ -321,19 +319,13 @@ class BladeViewExtractor
     {
         $bladePropsAsVueProps = Collection::make($this->getBladePropsThatArePassedAsVueProps())
             ->map(function (object $specs) {
-                $default = $specs->raw
-                    ? Factory::convertJsonToJavaScriptExpression($specs->default)
-                    : Js::from($specs->default)->toHtml();
-
                 $type = null;
 
                 if (! $specs->raw) {
                     $type = is_array($specs->type) ? '['.implode(',', $specs->type).']' : "{$specs->type}";
                 }
 
-                return $type
-                    ? "{type: {$type}, default: {$default}}"
-                    : "{default: {$default}}";
+                return $type ? "{type: {$type}}" : '{}';
             });
 
         $defaultProps = Collection::make(['spladeTemplateId' => 'String'])

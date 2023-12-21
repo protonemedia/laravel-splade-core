@@ -21,7 +21,16 @@ class ResolveOnce
         return new static($callback);
     }
 
-    private function resolve(): array
+    public function resolveWhen(bool $value)
+    {
+        if ($value) {
+            return $this->resolve();
+        }
+
+        return $this;
+    }
+
+    private function resolve()
     {
         if ($this->resolved) {
             return $this->result;
@@ -33,7 +42,7 @@ class ResolveOnce
         });
     }
 
-    public function __invoke(): array
+    public function __invoke()
     {
         return $this->resolve();
     }

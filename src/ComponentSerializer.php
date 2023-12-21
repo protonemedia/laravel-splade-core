@@ -65,13 +65,13 @@ class ComponentSerializer implements Arrayable
     /**
      * Serializes the component to an array with a signature.
      */
-    public function toArray(array $with = []): array
+    public function toArray(array $with = [], bool $resolveImmediately = false): array
     {
         return static::getDataWithSignature(
             array_merge([
-                'data' => $this->getDataFromProperties(),
-                'props' => $this->getPropsFromComponent(),
-                'functions' => $this->getFunctionsFromComponentClass(get_class($this->component)),
+                'data' => ResolveOnce::make(fn () => $this->getDataFromProperties())->resolveWhen($resolveImmediately),
+                'props' => ResolveOnce::make(fn () => $this->getPropsFromComponent())->resolveWhen($resolveImmediately),
+                'functions' => ResolveOnce::make(fn () => $this->getFunctionsFromComponentClass(get_class($this->component)))->resolveWhen($resolveImmediately),
                 'instance' => $this->getSerializedComponent(),
                 'invoke_url' => route('splade-core.invoke-component'),
                 'original_url' => null,

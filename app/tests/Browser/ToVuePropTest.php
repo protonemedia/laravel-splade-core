@@ -30,7 +30,8 @@ class ToVuePropTest extends DuskTestCase
                 ->assertSee('Default Array: [ "foo" ]')
                 ->assertSee('Multiple Types: [ "foo" ]')
                 ->assertSee('Data From Method: [ "foo", "bar", "baz" ]')
-                ->assertSee('Renamed: renamed-foo');
+                ->assertSee('Renamed: renamed-foo')
+                ->assertSee('JSON: { "foo": "bar" } (object)');
         });
     }
 }

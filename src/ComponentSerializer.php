@@ -11,7 +11,9 @@ use Illuminate\View\Component;
 use JsonSerializable;
 use ProtoneMedia\SpladeCore\Attributes\Vue;
 use ProtoneMedia\SpladeCore\Attributes\VueProp;
+use ProtoneMedia\SpladeCore\Attributes\VuePropRaw;
 use ProtoneMedia\SpladeCore\Attributes\VueRef;
+use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -163,6 +165,23 @@ class ComponentSerializer implements Arrayable
         return $values;
     }
 
+    private static function getVuePropAttribute(ReflectionProperty|ReflectionMethod $propertyOrMethod): ?ReflectionAttribute
+    {
+        $prop = $propertyOrMethod->getAttributes(VueProp::class);
+
+        if (! empty($prop)) {
+            return $prop[0];
+        }
+
+        $propRaw = $propertyOrMethod->getAttributes(VuePropRaw::class);
+
+        if (! empty($propRaw)) {
+            return $propRaw[0];
+        }
+
+        return null;
+    }
+
     /**
      * Same as getPropsFromComponent() but for a component class, so
      * without any values.
@@ -186,11 +205,13 @@ class ComponentSerializer implements Arrayable
                 continue;
             }
 
-            if (empty($vuePropAttributes = $property->getAttributes(VueProp::class))) {
+            $vuePropAttribute = static::getVuePropAttribute($property);
+
+            if (! $vuePropAttribute) {
                 continue;
             }
 
-            $as = $vuePropAttributes[0]->getArguments()['as'] ?? $name;
+            $as = $vuePropAttribute->getArguments()['as'] ?? $name;
 
             $defaultValue = $property->getDefaultValue();
 
@@ -202,6 +223,7 @@ class ComponentSerializer implements Arrayable
 
             $values[$as] = (object) [
                 'default' => $defaultValue,
+                'raw' => $vuePropAttribute->getName() === VuePropRaw::class,
                 'type' => static::mapTypeToVueType($property->getType()),
                 'value' => null,
             ];
@@ -222,14 +244,17 @@ class ComponentSerializer implements Arrayable
                 continue;
             }
 
-            if (empty($vuePropAttributes = $method->getAttributes(VueProp::class))) {
+            $vuePropAttribute = static::getVuePropAttribute($method);
+
+            if (! $vuePropAttribute) {
                 continue;
             }
 
-            $as = $vuePropAttributes[0]->getArguments()['as'] ?? $name;
+            $as = $vuePropAttribute->getArguments()['as'] ?? $name;
 
             $values[$as] = (object) [
                 'default' => null,
+                'raw' => $vuePropAttribute->getName() === VuePropRaw::class,
                 'type' => static::mapTypeToVueType($method->getReturnType()),
                 'value' => null,
             ];
@@ -260,11 +285,13 @@ class ComponentSerializer implements Arrayable
                 continue;
             }
 
-            if (empty($vuePropAttributes = $property->getAttributes(VueProp::class))) {
+            $vuePropAttribute = static::getVuePropAttribute($property);
+
+            if (! $vuePropAttribute) {
                 continue;
             }
 
-            $as = $vuePropAttributes[0]->getArguments()['as'] ?? $name;
+            $as = $vuePropAttribute->getArguments()['as'] ?? $name;
 
             $value = $property->isInitialized($this->component)
                 ? $property->getValue($this->component)
@@ -301,6 +328,7 @@ class ComponentSerializer implements Arrayable
 
             $values[$as] = (object) [
                 'default' => $defaultValue,
+                'raw' => $vuePropAttribute->getName() === VuePropRaw::class,
                 'type' => static::mapTypeToVueType($property->getType()),
                 'value' => $this->getSerializedPropertyValue($value),
             ];
@@ -321,14 +349,17 @@ class ComponentSerializer implements Arrayable
                 continue;
             }
 
-            if (empty($vuePropAttributes = $method->getAttributes(VueProp::class))) {
+            $vuePropAttribute = static::getVuePropAttribute($method);
+
+            if (! $vuePropAttribute) {
                 continue;
             }
 
-            $as = $vuePropAttributes[0]->getArguments()['as'] ?? $name;
+            $as = $vuePropAttribute->getArguments()['as'] ?? $name;
 
             $values[$as] = (object) [
                 'default' => null,
+                'raw' => $vuePropAttribute->getName() === VuePropRaw::class,
                 'type' => static::mapTypeToVueType($method->getReturnType()),
                 'value' => Container::getInstance()->call([$this->component, $name]),
             ];

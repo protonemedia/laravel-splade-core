@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 use ProtoneMedia\SpladeCore\Attributes\VueProp;
+use ProtoneMedia\SpladeCore\Attributes\VuePropRaw;
 use Psr\SimpleCache\CacheInterface;
 
 class ToVueProp extends Component
@@ -39,6 +40,7 @@ class ToVueProp extends Component
         #[VueProp] public array $defaultArray = ['foo'],
         #[VueProp] public array|bool|string $multipleTypes = ['foo'],
         #[VueProp(as: 'renamed')] public string $name = 'renamed-foo',
+        #[VuePropRaw] public string $json = '{"foo":"bar"}',
     ) {
     }
 

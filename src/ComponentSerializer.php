@@ -371,7 +371,7 @@ class ComponentSerializer implements Arrayable
     /**
      * Maps a PHP type to a Vue type.
      */
-    public static function mapTypeToVueType(ReflectionType $type = null): array|string|null
+    public static function mapTypeToVueType(?ReflectionType $type = null): array|string|null
     {
         if ($type instanceof \ReflectionUnionType) {
             $types = collect($type->getTypes())

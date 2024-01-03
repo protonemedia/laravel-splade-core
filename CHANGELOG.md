@@ -2,6 +2,10 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 2.2.3 - 2024-01-03
+
+Small typo fix
+
 ## 2.2.2 - 2023-12-21
 
 * Cleanup + improved JS object passing
@@ -29,6 +33,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 
 

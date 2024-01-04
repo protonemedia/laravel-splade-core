@@ -2,6 +2,10 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 2.2.4 - 2024-01-04
+
+* Don't transform empty objects
+
 ## 2.2.3 - 2024-01-03
 
 Small typo fix
@@ -33,6 +37,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 
 

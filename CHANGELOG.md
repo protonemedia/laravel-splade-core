@@ -2,6 +2,10 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 2.3.0 - 2024-01-12
+
+* Support for Blade Middleware so packages could tap into Splade Core
+
 ## 2.2.4 - 2024-01-04
 
 * Don't transform empty objects
@@ -37,6 +41,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 
 

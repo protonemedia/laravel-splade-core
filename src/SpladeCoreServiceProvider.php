@@ -59,11 +59,15 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
         });
     }
 
+    protected function getBladeCompiler(): BladeCompiler
+    {
+        return $this->app['blade.compiler'];
+    }
+
     protected function registerComponentHelper()
     {
         $this->app->singleton(ComponentHelper::class, function () {
-            /** @var BladeCompiler */
-            $bladeCompliler = $this->app['blade.compiler'];
+            $bladeCompliler = $this->getBladeCompiler();
 
             $componentTagCompiler = new ComponentTagCompiler(
                 $bladeCompliler->getClassComponentAliases(),
@@ -84,7 +88,7 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
         $resolver = $this->app['view.engine.resolver'];
 
         $resolver->register('blade', function () {
-            $compiler = new CompilerEngine($this->app['blade.compiler'], $this->app['files']);
+            $compiler = new CompilerEngine($this->getBladeCompiler(), $this->app['files']);
 
             $this->app->terminating(static function () use ($compiler) {
                 $compiler->forgetCompiledOrNotExpired();

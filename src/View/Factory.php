@@ -41,11 +41,19 @@ class Factory extends BaseFactory
     }
 
     /**
-     * Get the tracked Splade components.
+     * Get a single tracked Splade component.
      */
     public static function getSpladeComponent(string $key): ?string
     {
         return static::$spladeComponents[$key] ?? null;
+    }
+
+    /**
+     * Get all tracked Splade components.
+     */
+    public static function getSpladeComponents(): array
+    {
+        return static::$spladeComponents;
     }
 
     /**

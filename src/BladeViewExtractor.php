@@ -22,6 +22,8 @@ class BladeViewExtractor
 
     protected ScriptParser $scriptParser;
 
+    protected ?array $importedComponents = null;
+
     public function __construct(
         protected readonly string $originalView,
         protected readonly array $data,
@@ -109,6 +111,7 @@ class BladeViewExtractor
 
         $this->splitOriginalView();
         $this->scriptParser = new ScriptParser($this->originalScript);
+        $this->scriptParser->getImports();
 
         // Some pre-processing of the view.
         $this->viewWithoutScriptTag = $this->replaceComponentMethodLoadingStates($this->viewWithoutScriptTag);
@@ -352,6 +355,7 @@ class BladeViewExtractor
     {
         $vueFunctionsImports = $this->scriptParser->getVueFunctions()
             ->push('h')
+            ->when($this->getImportedComponents()['dynamic']->isNotEmpty(), fn ($collection) => $collection->push('markRaw'))
             ->when($this->needsSpladeBridge(), fn ($collection) => $collection->push('ref'))
             ->when($this->isRefreshable(), fn ($collection) => $collection->push('inject'))
             ->when($this->isComponent() && ! empty($this->getBladeProperties()), fn ($collection) => $collection->push('computed'))
@@ -465,6 +469,46 @@ JS;
     }
 
     /**
+     * Returns the imported components.
+     */
+    protected function getImportedComponents(): array
+    {
+        if ($this->importedComponents) {
+            return $this->importedComponents;
+        }
+
+        $this->importedComponents = [
+            'static' => Collection::make([]),
+            'dynamic' => Collection::make([]),
+        ];
+
+        if (! $this->isComponent()) {
+            return $this->importedComponents;
+        }
+
+        Collection::make($this->scriptParser->getImports())
+            ->keys()
+            ->each(function (string $import) {
+                if (Str::contains($this->viewWithoutScriptTag, "<{$import}")) {
+                    return $this->importedComponents['static'][] = $import;
+                }
+
+                // match anything in :is="" (e.g.: :is="true ? A : B") attribute
+                preg_match_all('/:is="(.+?)"/', $this->viewWithoutScriptTag, $matches);
+
+                $isDynamic = Collection::make($matches[1] ?? [])
+                    ->flatMap(fn (string $match) => explode(' ', $match))
+                    ->contains($import);
+
+                if ($isDynamic) {
+                    return $this->importedComponents['dynamic'][] = $import;
+                }
+            });
+
+        return $this->importedComponents;
+    }
+
+    /**
      * Renders the SpladeRender 'h'-function.
      */
     protected function renderSpladeRenderFunction(): string
@@ -473,16 +517,25 @@ JS;
 inheritAttrs: false,
 JS : '';
 
+        $importedComponents = $this->getImportedComponents();
+
         $dataObject = Collection::make(['...props'])
             ->merge($this->getBladeProperties())
             ->merge($this->scriptParser->getVariables()->reject(fn ($variable) => $variable === 'props'))
             ->merge($this->getBladeFunctions())
             ->when($this->isRefreshable(), fn (Collection $collection) => $collection->push('refreshComponent'))
             ->when($this->viewUsesElementRefs(), fn (Collection $collection) => $collection->push('setSpladeRef'))
+            ->merge($importedComponents['dynamic']->map(function (string $component) {
+                return "{$component}: markRaw({$component})";
+            }))
             ->implode(',');
 
-        $componentsObject = $this->isComponent() ? <<<'JS'
-components: { GenericSpladeComponent },
+        $components = Collection::make([
+            'GenericSpladeComponent', ...$importedComponents['static'],
+        ])->implode(',');
+
+        $componentsObject = $this->isComponent() ? <<<JS
+components: { {$components} },
 JS : '';
 
         return <<<JS

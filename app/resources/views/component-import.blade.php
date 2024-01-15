@@ -1,3 +1,3 @@
 <x-layout>
-    <x-dynamic-component-import />
+    <x-component-import />
 </x-layout>

@@ -2,6 +2,14 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 2.4.0 - 2024-01-15
+
+### What's Changed
+
+* Support for Vue Components import + passthrough by @pascalbaljet in https://github.com/protonemedia/laravel-splade-core/pull/23
+
+**Full Changelog**: https://github.com/protonemedia/laravel-splade-core/compare/2.3.0...2.4.0
+
 ## 2.3.0 - 2024-01-12
 
 * Support for Blade Middleware so packages could tap into Splade Core
@@ -41,6 +49,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 
 

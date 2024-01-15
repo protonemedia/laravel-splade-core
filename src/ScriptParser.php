@@ -11,6 +11,7 @@ use Peast\Syntax\Node\ArrayPattern;
 use Peast\Syntax\Node\CallExpression;
 use Peast\Syntax\Node\FunctionDeclaration;
 use Peast\Syntax\Node\Identifier;
+use Peast\Syntax\Node\ImportDeclaration;
 use Peast\Syntax\Node\ObjectExpression;
 use Peast\Syntax\Node\ObjectPattern;
 use Peast\Syntax\Node\Program;
@@ -23,8 +24,6 @@ class ScriptParser
     protected Program $rootNode;
 
     protected string $script;
-
-    protected array $imports = [];
 
     protected array $vueFunctions = [
         'computed',
@@ -56,16 +55,6 @@ class ScriptParser
         $this->rootNode = Peast::latest($this->script, [
             'sourceType' => \Peast\Peast::SOURCE_TYPE_MODULE,
         ])->parse();
-    }
-
-    /**
-     * Removes the import statements from the script.
-     */
-    protected function removeImports(string $script): string
-    {
-        return Collection::make(explode(PHP_EOL, $script))
-            ->filter(fn ($line) => ! str_starts_with(trim($line), 'import '))
-            ->implode(PHP_EOL);
     }
 
     /**

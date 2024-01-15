@@ -109,6 +109,7 @@ class BladeViewExtractor
 
         $this->splitOriginalView();
         $this->scriptParser = new ScriptParser($this->originalScript);
+        $this->scriptParser->getImports();
 
         // Some pre-processing of the view.
         $this->viewWithoutScriptTag = $this->replaceComponentMethodLoadingStates($this->viewWithoutScriptTag);
@@ -481,8 +482,27 @@ JS : '';
             ->when($this->viewUsesElementRefs(), fn (Collection $collection) => $collection->push('setSpladeRef'))
             ->implode(',');
 
-        $componentsObject = $this->isComponent() ? <<<'JS'
-components: { GenericSpladeComponent },
+        $components = Collection::make(
+            $this->isComponent() ? $this->scriptParser->getImports() : []
+        )
+            ->keys()
+            ->filter(function (string $import) {
+                if (Str::contains($this->viewWithoutScriptTag, "<{$import}")) {
+                    return true;
+                }
+
+                // match anything in :is="" (e.g.: :is="true ? A : B") attribute
+                preg_match_all('/:is="(.+?)"/', $this->viewWithoutScriptTag, $matches);
+
+                return Collection::make($matches[1] ?? [])
+                    ->flatMap(fn (string $match) => explode(' ', $match))
+                    ->contains('TransitionRoot');
+            })
+            ->prepend('GenericSpladeComponent')
+            ->implode(',');
+
+        $componentsObject = $this->isComponent() ? <<<JS
+components: { {$components} },
 JS : '';
 
         return <<<JS

@@ -22,7 +22,9 @@ class ScriptParser
 {
     protected Program $rootNode;
 
-    protected string $scriptWithoutImports;
+    protected string $script;
+
+    protected array $imports = [];
 
     protected array $vueFunctions = [
         'computed',
@@ -49,9 +51,11 @@ class ScriptParser
 
     public function __construct(string $script)
     {
-        $this->scriptWithoutImports = trim($this->removeImports($script));
+        $this->script = $script;
 
-        $this->rootNode = Peast::latest($this->scriptWithoutImports)->parse();
+        $this->rootNode = Peast::latest($this->script, [
+            'sourceType' => \Peast\Peast::SOURCE_TYPE_MODULE,
+        ])->parse();
     }
 
     /**
@@ -108,7 +112,7 @@ class ScriptParser
     {
         foreach ($this->rootNode->query('CallExpression[callee.name="defineProps"]') as $node) {
             /** @var CallExpression $node */
-            $definePropsScript = collect(explode(PHP_EOL, $this->scriptWithoutImports))
+            $definePropsScript = collect(explode(PHP_EOL, $this->script))
                 ->filter(function (string $contents, int $line) use ($node) {
                     return $line >= ($node->getLocation()->getStart()->getLine() - 1)
                         && $line <= ($node->getLocation()->getEnd()->getLine() - 1);
@@ -198,5 +202,27 @@ class ScriptParser
         }
 
         return $variables->merge($additionalItems)->unique()->sort()->values();
+    }
+
+    /**
+     * Returns an array of all imports.
+     */
+    public function getImports(): array
+    {
+        $imports = [];
+
+        // find ImportDeclaration
+        foreach ($this->rootNode->query('ImportDeclaration') as $node) {
+            /** @var ImportDeclaration $node */
+            $source = $node->getSource()->getValue();
+
+            // find ImportSpecifier
+            foreach ($node->getSpecifiers() as $specifier) {
+                /** @var ImportSpecifier $specifier */
+                $imports[$specifier->getLocal()->getName()] = $source;
+            }
+        }
+
+        return $imports;
     }
 }

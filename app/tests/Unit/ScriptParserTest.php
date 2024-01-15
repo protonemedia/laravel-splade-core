@@ -179,4 +179,21 @@ JS;
 
         $this->assertEquals(['age', 'baz', 'city', 'country', 'foo', 'greet', 'name', 'quux'], $parser->getVariables()->toArray());
     }
+
+    /** @test */
+    public function it_returns_an_array_with_all_js_imports()
+    {
+        $script = <<<'JS'
+import { Dialog, DialogPanel, TransitionRoot, TransitionChild } from "@headlessui/vue";
+JS;
+
+        $parser = new ScriptParser($script);
+
+        $this->assertEquals([
+            'Dialog' => '@headlessui/vue',
+            'DialogPanel' => '@headlessui/vue',
+            'TransitionRoot' => '@headlessui/vue',
+            'TransitionChild' => '@headlessui/vue',
+        ], $parser->getImports());
+    }
 }

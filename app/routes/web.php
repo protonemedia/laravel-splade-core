@@ -25,6 +25,7 @@ Route::view('/anonymous', 'anonymous');
 Route::view('/base-view', 'base-view');
 Route::view('/blade-method', 'blade-method');
 Route::view('/blade-method-callbacks', 'blade-method-callbacks');
+Route::view('/component-import', 'component-import');
 Route::view('/change-blade-prop', 'change-blade-prop');
 Route::view('/dynamic', 'dynamic')->withoutMiddleware(SubstituteBindings::class);
 Route::view('/form', 'form');

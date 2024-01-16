@@ -28,6 +28,7 @@ Route::view('/blade-method-callbacks', 'blade-method-callbacks');
 Route::view('/component-import', 'component-import');
 Route::view('/dynamic-component-import', 'dynamic-component-import');
 Route::view('/change-blade-prop', 'change-blade-prop');
+Route::view('/emit', 'emit');
 Route::view('/dynamic', 'dynamic')->withoutMiddleware(SubstituteBindings::class);
 Route::view('/form', 'form');
 Route::view('/props-in-template', 'props-in-template');

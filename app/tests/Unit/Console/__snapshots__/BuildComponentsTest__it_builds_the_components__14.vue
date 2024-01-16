@@ -16,14 +16,9 @@ const spladeRender = h({
     components: { GenericSpladeComponent, Dialog, DialogPanel },
     template: spladeTemplates[props.spladeTemplateId],
     data: () => {
-        return {
-            ...props,
-            openend,
-            show,
-            TransitionRoot: markRaw(TransitionRoot),
-            TransitionChild: markRaw(TransitionChild),
-        }
+        return { openend, show, TransitionRoot: markRaw(TransitionRoot), TransitionChild: markRaw(TransitionChild) }
     },
+    props,
 })
 </script>
 <template><spladeRender /></template>

@@ -25,8 +25,9 @@ const spladeRender = h({
     components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
     data: () => {
-        return { ...props, response, execute, fail }
+        return { response, execute, fail }
     },
+    props,
 })
 </script>
 <template><spladeRender /></template>

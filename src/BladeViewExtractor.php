@@ -519,7 +519,7 @@ JS : '';
 
         $importedComponents = $this->getImportedComponents();
 
-        $dataObject = Collection::make(['...props'])
+        $dataObject = Collection::make()
             ->merge($this->getBladeProperties())
             ->merge($this->scriptParser->getVariables()->reject(fn ($variable) => $variable === 'props'))
             ->merge($this->getBladeFunctions())
@@ -544,7 +544,8 @@ const spladeRender = h({
     name: "{$this->getTag()}Render",
     {$componentsObject}
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => { return { {$dataObject} } }
+    data: () => { return { {$dataObject} } },
+    props,
 });
 JS;
     }

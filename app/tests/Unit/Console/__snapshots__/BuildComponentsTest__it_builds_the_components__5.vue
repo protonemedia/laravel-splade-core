@@ -24,8 +24,9 @@ const spladeRender = h({
     components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
     data: () => {
-        return { ...props, emit, setSpladeRef }
+        return { emit, setSpladeRef }
     },
+    props,
 })
 </script>
 <template><spladeRender /></template>

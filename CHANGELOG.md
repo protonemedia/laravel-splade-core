@@ -2,6 +2,14 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 3.0.0 - 2024-01-17
+
+### What's Changed
+
+* Improved props passthrough by @pascalbaljet in https://github.com/protonemedia/laravel-splade-core/pull/25
+
+**Full Changelog**: https://github.com/protonemedia/laravel-splade-core/compare/2.4.0...3.0.0
+
 ## 2.4.0 - 2024-01-15
 
 ### What's Changed
@@ -49,6 +57,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 
 

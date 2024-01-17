@@ -2,6 +2,10 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 3.1.0 - 2024-01-17
+
+* Removed `h()` function from Vue scripts
+
 ## 3.0.0 - 2024-01-17
 
 ### What's Changed
@@ -57,6 +61,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 
 

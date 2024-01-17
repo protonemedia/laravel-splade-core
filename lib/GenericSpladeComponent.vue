@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h, inject, ref, onUnmounted } from "vue";
+import { computed, inject, ref, onUnmounted } from "vue";
 
 const props = defineProps({
     bridge: {

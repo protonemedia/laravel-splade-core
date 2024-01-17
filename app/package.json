@@ -7,7 +7,7 @@
     },
     "devDependencies": {
         "@headlessui/vue": "^1.7.17",
-        "@protonemedia/laravel-splade-core": "file:../protonemedia-laravel-splade-core-1.1.0.tgz",
+        "@protonemedia/laravel-splade-core": "file:../protonemedia-laravel-splade-core-3.0.0.tgz",
         "@protonemedia/laravel-splade-vite": "^1.0.3",
         "@vitejs/plugin-vue": "^4.3.4",
         "axios": "^1.1.2",

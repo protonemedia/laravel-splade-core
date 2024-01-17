@@ -1,6 +1,6 @@
 <script setup>
 import { BladeComponent, GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
-import { h, ref } from 'vue'
+import { ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
 const _spladeBridgeState = ref(props.spladeBridge)
 const execute = BladeComponent.asyncComponentMethod('execute', _spladeBridgeState)
@@ -12,7 +12,7 @@ const executeWithCallback = () => {
         response.value = data.data.response
     })
 }
-const spladeRender = h({
+const spladeRender = {
     name: 'SpladeComponentBladeMethodRender',
     components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
@@ -20,6 +20,6 @@ const spladeRender = h({
         return { executeWithCallback, response, execute, sleep }
     },
     props: { spladeBridge: Object, spladeTemplateId: String },
-})
+}
 </script>
 <template><spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" /></template>

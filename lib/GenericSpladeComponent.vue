@@ -23,12 +23,12 @@ onUnmounted(() => {
     eventBus.off(`template:${templateId}`, updateTemplate);
 });
 
-const render = computed(() =>
-    h({
+const render = computed(() => {
+    return {
         template: template.value,
         name: "GenericSpladeComponentRender",
-    }),
-);
+    };
+});
 </script>
 
 <template>

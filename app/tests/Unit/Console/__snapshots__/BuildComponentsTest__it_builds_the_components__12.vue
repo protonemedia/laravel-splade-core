@@ -1,6 +1,6 @@
 <script setup>
 import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
-import { h } from 'vue'
+import {} from 'vue'
 const props = defineProps({
     spladeBridge: Object,
     spladeTemplateId: String,
@@ -24,7 +24,7 @@ const props = defineProps({
     jsObject: {},
     dataFromMethod: { type: Array },
 })
-const spladeRender = h({
+const spladeRender = {
     name: 'SpladeComponentToVuePropRender',
     components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
@@ -54,7 +54,7 @@ const spladeRender = h({
         jsObject: {},
         dataFromMethod: { type: Array },
     },
-})
+}
 </script>
 <template>
     <spladeRender

@@ -1,8 +1,8 @@
 <script setup>
-import { h, ref } from 'vue'
+import { ref } from 'vue'
 const props = defineProps({ spladeTemplateId: String })
 const message = ref('Hello Included view!')
-const spladeRender = h({
+const spladeRender = {
     name: 'SpladeIncludedViewRender',
 
     template: spladeTemplates[props.spladeTemplateId],
@@ -10,6 +10,6 @@ const spladeRender = h({
         return { message }
     },
     props: { spladeTemplateId: String },
-})
+}
 </script>
 <template><spladeRender :splade-template-id="spladeTemplateId" /></template>

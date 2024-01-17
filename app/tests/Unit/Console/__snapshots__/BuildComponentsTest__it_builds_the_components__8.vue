@@ -1,6 +1,6 @@
 <script setup>
 import { BladeComponent, GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
-import { h, inject, ref } from 'vue'
+import { inject, ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
 const _spladeBridgeState = ref(props.spladeBridge)
 const _spladeTemplateBus = inject('$spladeTemplateBus')
@@ -18,7 +18,7 @@ refreshComponent.then(() => {
 refreshComponent.finally(() => {
     console.log('finally refreshed')
 })
-const spladeRender = h({
+const spladeRender = {
     name: 'SpladeComponentTimeStateRender',
     components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
@@ -26,6 +26,6 @@ const spladeRender = h({
         return { status, refreshComponent }
     },
     props: { spladeBridge: Object, spladeTemplateId: String },
-})
+}
 </script>
 <template><spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" /></template>

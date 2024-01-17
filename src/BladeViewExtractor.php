@@ -355,7 +355,6 @@ class BladeViewExtractor
     protected function renderImports(): string
     {
         $vueFunctionsImports = $this->scriptParser->getVueFunctions()
-            ->push('h')
             ->when($this->getImportedComponents()['dynamic']->isNotEmpty(), fn ($collection) => $collection->push('markRaw'))
             ->when($this->needsSpladeBridge(), fn ($collection) => $collection->push('ref'))
             ->when($this->isRefreshable(), fn ($collection) => $collection->push('inject'))
@@ -542,14 +541,14 @@ JS : '';
         $definePropsObject = $defineVueProps->getNewPropsObject();
 
         return <<<JS
-const spladeRender = h({
+const spladeRender = {
     {$inheritAttrs}
     name: "{$this->getTag()}Render",
     {$componentsObject}
     template: spladeTemplates[props.spladeTemplateId],
     data: () => { return { {$dataObject} } },
     props: {$definePropsObject},
-});
+};
 JS;
     }
 }

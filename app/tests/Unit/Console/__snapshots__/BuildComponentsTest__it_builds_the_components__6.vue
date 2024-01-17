@@ -1,13 +1,13 @@
 <script setup>
 import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
-import { h, ref } from 'vue'
+import { ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
 const form = ref({
     package: 'Splade',
     framework: 'laravel',
     date: '2021-01-01',
 })
-const spladeRender = h({
+const spladeRender = {
     name: 'SpladeComponentFormRender',
     components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
@@ -15,6 +15,6 @@ const spladeRender = h({
         return { form }
     },
     props: { spladeBridge: Object, spladeTemplateId: String },
-})
+}
 </script>
 <template><spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" /></template>

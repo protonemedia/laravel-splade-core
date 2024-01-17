@@ -4,7 +4,6 @@ import { h, onMounted } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String, modelValue: {} })
 const $refs = {}
 const setSpladeRef = (key, value) => ($refs[key] = value)
-
 import flatpickr from 'flatpickr'
 
 const emit = defineEmits(['update:modelValue'])
@@ -18,14 +17,16 @@ onMounted(() => {
 
     instance.setDate(props.modelValue)
 })
-
 const spladeRender = h({
     name: 'SpladeComponentDatePickerRender',
     components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
     data: () => {
-        return { ...props, emit, setSpladeRef }
+        return { emit, setSpladeRef }
     },
+    props: { spladeBridge: Object, spladeTemplateId: String, modelValue: {} },
 })
 </script>
-<template><spladeRender /></template>
+<template>
+    <spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" :model-value="modelValue" />
+</template>

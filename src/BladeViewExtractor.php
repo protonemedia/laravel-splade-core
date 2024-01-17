@@ -122,21 +122,22 @@ class BladeViewExtractor
         }
 
         // Adjust the current defineProps, or generate a new one if it didn't exist yet.
-        [$script, $defineProps] = $this->extractDefinePropsFromScript();
+        $defineVueProps = $this->extractDefinePropsFromScript();
+        $propsBag = $defineVueProps->toAttributeBag();
 
         $vueComponent = implode(PHP_EOL, array_filter([
             '<script setup>',
             $this->renderImports(),
-            $defineProps,
+            $defineVueProps->generatePropsDeclaration(),
             $this->renderSpladeBridgeState(),
             $this->renderBladeFunctionsAsJavascriptFunctions(),
             $this->renderBladePropertiesAsComputedVueProperties(),
             $this->renderJavascriptFunctionToRefreshComponent(),
             $this->renderElementRefStoreAndSetter(),
-            $script,
-            $this->renderSpladeRenderFunction(),
+            $defineVueProps->getOriginalScript(),
+            $this->renderSpladeRenderFunction($defineVueProps),
             '</script>',
-            '<template><spladeRender /></template>',
+            "<template><spladeRender {$propsBag->toHtml()} /></template>",
         ]));
 
         $directory = config('splade-core.compiled_scripts');
@@ -315,10 +316,8 @@ class BladeViewExtractor
 
     /**
      * Extract the defineProps from the script.
-     *
-     * @return array<string>
      */
-    protected function extractDefinePropsFromScript(): array
+    protected function extractDefinePropsFromScript(): DefineVueProps
     {
         $bladePropsAsVueProps = Collection::make($this->getBladePropsThatArePassedAsVueProps())
             ->map(function (object $specs) {
@@ -336,16 +335,18 @@ class BladeViewExtractor
             ->when($this->isComponent(), fn (Collection $collection) => $collection->prepend('Object', 'spladeBridge'))
             ->when($this->viewUsesVModel(), fn (Collection $collection) => $collection->put('modelValue', '{}'));
 
-        $defineProps = $this->scriptParser->getDefineProps($defaultProps->all());
+        $defineVueProps = $this->scriptParser->getDefineProps($defaultProps->all());
 
-        if (! $defineProps['original']) {
-            return [$this->originalScript, $defineProps['new']];
+        if (! $defineVueProps->getOriginalScript()) {
+            $defineVueProps->setOriginalScript($this->originalScript);
+
+        } else {
+            $defineVueProps->setOriginalScript(
+                str_replace($defineVueProps->getOriginalScript(), '', $this->originalScript)
+            );
         }
 
-        return [
-            str_replace($defineProps['original'], '', $this->originalScript),
-            $defineProps['new'],
-        ];
+        return $defineVueProps;
     }
 
     /**
@@ -511,7 +512,7 @@ JS;
     /**
      * Renders the SpladeRender 'h'-function.
      */
-    protected function renderSpladeRenderFunction(): string
+    protected function renderSpladeRenderFunction(DefineVueProps $defineVueProps): string
     {
         $inheritAttrs = $this->attributesAreCustomBound() ? <<<'JS'
 inheritAttrs: false,
@@ -519,7 +520,7 @@ JS : '';
 
         $importedComponents = $this->getImportedComponents();
 
-        $dataObject = Collection::make(['...props'])
+        $dataObject = Collection::make()
             ->merge($this->getBladeProperties())
             ->merge($this->scriptParser->getVariables()->reject(fn ($variable) => $variable === 'props'))
             ->merge($this->getBladeFunctions())
@@ -538,13 +539,16 @@ JS : '';
 components: { {$components} },
 JS : '';
 
+        $definePropsObject = $defineVueProps->getNewPropsObject();
+
         return <<<JS
 const spladeRender = h({
     {$inheritAttrs}
     name: "{$this->getTag()}Render",
     {$componentsObject}
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => { return { {$dataObject} } }
+    data: () => { return { {$dataObject} } },
+    props: {$definePropsObject},
 });
 JS;
     }

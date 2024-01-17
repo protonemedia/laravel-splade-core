@@ -14,10 +14,11 @@ class ScriptParserTest extends TestCase
 
         $this->assertEquals([
             'original' => '',
-            'new' => 'const props = defineProps({foo: String});',
+            'new' => '{foo: String}',
+            'keys' => ['foo'],
         ], $parser->getDefineProps([
             'foo' => 'String',
-        ]));
+        ])->toArray());
     }
 
     /** @test */
@@ -31,8 +32,9 @@ JS;
 
         $this->assertEquals([
             'original' => "defineProps(['foo', 'bar']);",
-            'new' => 'const props = defineProps({foo: {}, bar: {}});',
-        ], $parser->getDefineProps());
+            'new' => '{foo: {}, bar: {}}',
+            'keys' => ['foo', 'bar'],
+        ], $parser->getDefineProps()->toArray());
     }
 
     /** @test */
@@ -46,8 +48,9 @@ JS;
 
         $this->assertEquals([
             'original' => "const props = defineProps(['foo', 'bar']);",
-            'new' => 'const props = defineProps({foo: {}, bar: {}});',
-        ], $parser->getDefineProps());
+            'new' => '{foo: {}, bar: {}}',
+            'keys' => ['foo', 'bar'],
+        ], $parser->getDefineProps()->toArray());
     }
 
     /** @test */
@@ -61,10 +64,11 @@ JS;
 
         $this->assertEquals([
             'original' => "defineProps(['foo', 'bar']);",
-            'new' => 'const props = defineProps({foo: {}, bar: {}, baz: String});',
+            'new' => '{foo: {}, bar: {}, baz: String}',
+            'keys' => ['foo', 'bar', 'baz'],
         ], $parser->getDefineProps([
             'baz' => 'String',
-        ]));
+        ])->toArray());
     }
 
     /** @test */
@@ -78,8 +82,9 @@ JS;
 
         $this->assertEquals([
             'original' => 'defineProps({foo: {type: String}, bar: {type: Array}});',
-            'new' => 'const props = defineProps({foo: {type: String}, bar: {type: Array}});',
-        ], $parser->getDefineProps());
+            'new' => '{foo: {type: String}, bar: {type: Array}}',
+            'keys' => ['foo', 'bar'],
+        ], $parser->getDefineProps()->toArray());
     }
 
     /** @test */
@@ -93,8 +98,9 @@ JS;
 
         $this->assertEquals([
             'original' => 'defineProps({foo: String, bar: Array});',
-            'new' => 'const props = defineProps({foo: String, bar: Array});',
-        ], $parser->getDefineProps());
+            'new' => '{foo: String, bar: Array}',
+            'keys' => ['foo', 'bar'],
+        ], $parser->getDefineProps()->toArray());
     }
 
     /** @test */
@@ -108,10 +114,11 @@ JS;
 
         $this->assertEquals([
             'original' => 'defineProps({foo: {type: String}, bar: {type: Array}});',
-            'new' => 'const props = defineProps({baz: String, foo: {type: String}, bar: {type: Array}});',
+            'new' => '{baz: String, foo: {type: String}, bar: {type: Array}}',
+            'keys' => ['foo', 'bar', 'baz'],
         ], $parser->getDefineProps([
             'baz' => 'String',
-        ]));
+        ])->toArray());
     }
 
     /** @test */
@@ -125,10 +132,11 @@ JS;
 
         $this->assertEquals([
             'original' => 'defineProps({foo: String, bar: Array});',
-            'new' => 'const props = defineProps({baz: String, foo: String, bar: Array});',
+            'new' => '{baz: String, foo: String, bar: Array}',
+            'keys' => ['foo', 'bar', 'baz'],
         ], $parser->getDefineProps([
             'baz' => 'String',
-        ]));
+        ])->toArray());
     }
 
     /** @test */
@@ -142,8 +150,9 @@ JS;
 
         $this->assertEquals([
             'original' => 'const props = defineProps({foo: {type: String}, bar: {type: Array}});',
-            'new' => 'const props = defineProps({foo: {type: String}, bar: {type: Array}});',
-        ], $parser->getDefineProps());
+            'new' => '{foo: {type: String}, bar: {type: Array}}',
+            'keys' => ['foo', 'bar'],
+        ], $parser->getDefineProps()->toArray());
     }
 
     /** @test */

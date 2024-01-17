@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
+use Illuminate\View\ComponentAttributeBag;
 use InvalidArgumentException;
 use ProtoneMedia\SpladeCore\Facades\SpladePlugin;
 
@@ -122,7 +123,15 @@ class BladeViewExtractor
         }
 
         // Adjust the current defineProps, or generate a new one if it didn't exist yet.
-        [$script, $defineProps] = $this->extractDefinePropsFromScript();
+        [$script, $defineProps, $definePropsObject, $definePropNames] = $this->extractDefinePropsFromScript();
+
+        $attrs = collect($definePropNames)->mapWithKeys(function (string $prop) {
+            return ['v-bind:'.$prop => $prop];
+        })->all();
+
+        $bag = new ComponentAttributeBag($attrs);
+
+        $template = "<template><spladeRender {$bag->toHtml()} /></template>";
 
         $vueComponent = implode(PHP_EOL, array_filter([
             '<script setup>',
@@ -134,9 +143,9 @@ class BladeViewExtractor
             $this->renderJavascriptFunctionToRefreshComponent(),
             $this->renderElementRefStoreAndSetter(),
             $script,
-            $this->renderSpladeRenderFunction(),
+            $this->renderSpladeRenderFunction($definePropsObject),
             '</script>',
-            '<template><spladeRender /></template>',
+            $template,
         ]));
 
         $directory = config('splade-core.compiled_scripts');
@@ -339,12 +348,14 @@ class BladeViewExtractor
         $defineProps = $this->scriptParser->getDefineProps($defaultProps->all());
 
         if (! $defineProps['original']) {
-            return [$this->originalScript, $defineProps['new']];
+            return [$this->originalScript, $defineProps['new'], $defineProps['object'], $defineProps['keys']];
         }
 
         return [
             str_replace($defineProps['original'], '', $this->originalScript),
             $defineProps['new'],
+            $defineProps['object'],
+            $defineProps['keys'],
         ];
     }
 
@@ -511,7 +522,7 @@ JS;
     /**
      * Renders the SpladeRender 'h'-function.
      */
-    protected function renderSpladeRenderFunction(): string
+    protected function renderSpladeRenderFunction($definePropsObject): string
     {
         $inheritAttrs = $this->attributesAreCustomBound() ? <<<'JS'
 inheritAttrs: false,
@@ -545,7 +556,7 @@ const spladeRender = h({
     {$componentsObject}
     template: spladeTemplates[props.spladeTemplateId],
     data: () => { return { {$dataObject} } },
-    props,
+    props: {$definePropsObject},
 });
 JS;
     }

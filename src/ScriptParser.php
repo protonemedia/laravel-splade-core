@@ -99,6 +99,8 @@ class ScriptParser
      */
     public function getDefineProps(array $mergeWith = []): array
     {
+        $propKeys = [];
+
         foreach ($this->rootNode->query('CallExpression[callee.name="defineProps"]') as $node) {
             /** @var CallExpression $node */
             $definePropsScript = collect(explode(PHP_EOL, $this->script))
@@ -114,15 +116,21 @@ class ScriptParser
             if ($firstArgument instanceof ArrayExpression) {
                 $props = collect($firstArgument->getElements())
                     ->map(fn (StringLiteral $element) => $element->getValue())
-                    ->mapWithKeys(fn (string $prop) => [$prop => ''])
+                    ->mapWithKeys(function (string $prop) use (&$propKeys) {
+                        $propKeys[] = $prop;
+
+                        return [$prop => ''];
+                    })
                     ->merge($mergeWith)
                     ->pipe(fn (Collection $props) => $this->toPropsObjectDefinition($props));
 
                 $newPropsObject = "{{$props}}";
             } elseif ($firstArgument instanceof ObjectExpression) {
                 $props = collect($firstArgument->getProperties())
-                    ->mapWithKeys(function (Property $property) {
+                    ->mapWithKeys(function (Property $property) use (&$propKeys) {
                         $key = $property->getKey()->getName();
+
+                        $propKeys[] = $key;
 
                         if ($property->getValue() instanceof Identifier) {
                             return [$key => $property->getValue()->getName()];
@@ -145,6 +153,8 @@ class ScriptParser
             return [
                 'original' => trim($definePropsScript),
                 'new' => "const props = defineProps({$newPropsObject});",
+                'object' => $newPropsObject,
+                'keys' => [...$propKeys, ...array_keys($mergeWith)],
             ];
         }
 
@@ -153,6 +163,8 @@ class ScriptParser
         return [
             'original' => '',
             'new' => 'const props = defineProps({'.$keys.'});',
+            'object' => '{'.$keys.'}',
+            'keys' => [...$propKeys, ...array_keys($mergeWith)],
         ];
     }
 

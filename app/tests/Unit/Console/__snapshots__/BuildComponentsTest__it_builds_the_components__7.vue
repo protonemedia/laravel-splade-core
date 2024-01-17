@@ -5,7 +5,6 @@ const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
 const _spladeBridgeState = ref(props.spladeBridge)
 const _spladeTemplateBus = inject('$spladeTemplateBus')
 const refreshComponent = BladeComponent.asyncRefreshComponent(_spladeBridgeState, _spladeTemplateBus)
-
 const spladeRender = h({
     inheritAttrs: false,
     name: 'SpladeComponentTimeRender',
@@ -14,7 +13,7 @@ const spladeRender = h({
     data: () => {
         return { refreshComponent }
     },
-    props,
+    props: { spladeBridge: Object, spladeTemplateId: String },
 })
 </script>
-<template><spladeRender /></template>
+<template><spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" /></template>

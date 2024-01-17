@@ -19,7 +19,7 @@ const spladeRender = h({
     data: () => {
         return { message, setMessage }
     },
-    props,
+    props: { spladeBridge: Object, spladeTemplateId: String },
 })
 </script>
-<template><spladeRender /></template>
+<template><spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" /></template>

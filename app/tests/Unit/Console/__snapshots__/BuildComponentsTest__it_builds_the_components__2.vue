@@ -5,7 +5,6 @@ const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
 const _spladeBridgeState = ref(props.spladeBridge)
 const execute = BladeComponent.asyncComponentMethod('execute', _spladeBridgeState)
 const sleep = BladeComponent.asyncComponentMethod('sleep', _spladeBridgeState)
-
 const response = ref('-')
 
 const executeWithCallback = () => {
@@ -13,7 +12,6 @@ const executeWithCallback = () => {
         response.value = data.data.response
     })
 }
-
 const spladeRender = h({
     name: 'SpladeComponentBladeMethodRender',
     components: { GenericSpladeComponent },
@@ -21,7 +19,7 @@ const spladeRender = h({
     data: () => {
         return { executeWithCallback, response, execute, sleep }
     },
-    props,
+    props: { spladeBridge: Object, spladeTemplateId: String },
 })
 </script>
-<template><spladeRender /></template>
+<template><spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" /></template>

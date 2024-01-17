@@ -2,10 +2,8 @@
 import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
 import { computed, h, ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
-
 const message = ref('Hello Vue!')
 const uppercase = computed(() => message.value.toUpperCase())
-
 const spladeRender = h({
     name: 'SpladeComponentTwoWayBindingRender',
     components: { GenericSpladeComponent },
@@ -13,7 +11,7 @@ const spladeRender = h({
     data: () => {
         return { message, uppercase }
     },
-    props,
+    props: { spladeBridge: Object, spladeTemplateId: String },
 })
 </script>
-<template><spladeRender /></template>
+<template><spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" /></template>

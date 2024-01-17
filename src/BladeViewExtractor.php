@@ -7,7 +7,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
-use Illuminate\View\ComponentAttributeBag;
 use InvalidArgumentException;
 use ProtoneMedia\SpladeCore\Facades\SpladePlugin;
 
@@ -123,29 +122,22 @@ class BladeViewExtractor
         }
 
         // Adjust the current defineProps, or generate a new one if it didn't exist yet.
-        [$script, $defineProps, $definePropsObject, $definePropNames] = $this->extractDefinePropsFromScript();
-
-        $attrs = collect($definePropNames)->mapWithKeys(function (string $prop) {
-            return ['v-bind:'.$prop => $prop];
-        })->all();
-
-        $bag = new ComponentAttributeBag($attrs);
-
-        $template = "<template><spladeRender {$bag->toHtml()} /></template>";
+        $defineVueProps = $this->extractDefinePropsFromScript();
+        $propsBag = $defineVueProps->toAttributeBag();
 
         $vueComponent = implode(PHP_EOL, array_filter([
             '<script setup>',
             $this->renderImports(),
-            $defineProps,
+            $defineVueProps->generatePropsDeclaration(),
             $this->renderSpladeBridgeState(),
             $this->renderBladeFunctionsAsJavascriptFunctions(),
             $this->renderBladePropertiesAsComputedVueProperties(),
             $this->renderJavascriptFunctionToRefreshComponent(),
             $this->renderElementRefStoreAndSetter(),
-            $script,
-            $this->renderSpladeRenderFunction($definePropsObject),
+            $defineVueProps->getOriginalScript(),
+            $this->renderSpladeRenderFunction($defineVueProps),
             '</script>',
-            $template,
+            "<template><spladeRender {$propsBag->toHtml()} /></template>",
         ]));
 
         $directory = config('splade-core.compiled_scripts');
@@ -324,10 +316,8 @@ class BladeViewExtractor
 
     /**
      * Extract the defineProps from the script.
-     *
-     * @return array<string>
      */
-    protected function extractDefinePropsFromScript(): array
+    protected function extractDefinePropsFromScript(): DefineVueProps
     {
         $bladePropsAsVueProps = Collection::make($this->getBladePropsThatArePassedAsVueProps())
             ->map(function (object $specs) {
@@ -345,18 +335,18 @@ class BladeViewExtractor
             ->when($this->isComponent(), fn (Collection $collection) => $collection->prepend('Object', 'spladeBridge'))
             ->when($this->viewUsesVModel(), fn (Collection $collection) => $collection->put('modelValue', '{}'));
 
-        $defineProps = $this->scriptParser->getDefineProps($defaultProps->all());
+        $defineVueProps = $this->scriptParser->getDefineProps($defaultProps->all());
 
-        if (! $defineProps['original']) {
-            return [$this->originalScript, $defineProps['new'], $defineProps['object'], $defineProps['keys']];
+        if (! $defineVueProps->getOriginalScript()) {
+            $defineVueProps->setOriginalScript($this->originalScript);
+
+        } else {
+            $defineVueProps->setOriginalScript(
+                str_replace($defineVueProps->getOriginalScript(), '', $this->originalScript)
+            );
         }
 
-        return [
-            str_replace($defineProps['original'], '', $this->originalScript),
-            $defineProps['new'],
-            $defineProps['object'],
-            $defineProps['keys'],
-        ];
+        return $defineVueProps;
     }
 
     /**
@@ -522,7 +512,7 @@ JS;
     /**
      * Renders the SpladeRender 'h'-function.
      */
-    protected function renderSpladeRenderFunction($definePropsObject): string
+    protected function renderSpladeRenderFunction(DefineVueProps $defineVueProps): string
     {
         $inheritAttrs = $this->attributesAreCustomBound() ? <<<'JS'
 inheritAttrs: false,
@@ -548,6 +538,8 @@ JS : '';
         $componentsObject = $this->isComponent() ? <<<JS
 components: { {$components} },
 JS : '';
+
+        $definePropsObject = $defineVueProps->getNewPropsObject();
 
         return <<<JS
 const spladeRender = h({

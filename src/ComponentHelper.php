@@ -137,6 +137,10 @@ class ComponentHelper
             return $component::class;
         }
 
+        if (! Str::contains($component, 'components.') && ! Str::contains($component, '/components/')) {
+            return null;
+        }
+
         $class = rescue(
             callback: fn () => $this->componentTagCompiler->componentClass($this->getAlias($component)),
             report: false,

@@ -26,8 +26,6 @@ class DemoRoutesTest extends TestCase
     /**
      * @test
      *
-     * @runInSeparateProcess
-     *
      * @dataProvider demoRoutes
      */
     public function it_renders_all_demo_routes($route)

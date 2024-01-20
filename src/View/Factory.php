@@ -2,12 +2,14 @@
 
 namespace ProtoneMedia\SpladeCore\View;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 use Illuminate\View\ComponentAttributeBag;
 use Illuminate\View\Factory as BaseFactory;
 use ProtoneMedia\SpladeCore\AddSpladeToComponentData;
+use ProtoneMedia\SpladeCore\ResolveOnce;
 
 class Factory extends BaseFactory
 {
@@ -39,11 +41,19 @@ class Factory extends BaseFactory
     }
 
     /**
-     * Get the tracked Splade components.
+     * Get a single tracked Splade component.
      */
     public static function getSpladeComponent(string $key): ?string
     {
         return static::$spladeComponents[$key] ?? null;
+    }
+
+    /**
+     * Get all tracked Splade components.
+     */
+    public static function getSpladeComponents(): array
+    {
+        return static::$spladeComponents;
     }
 
     /**
@@ -116,7 +126,9 @@ class Factory extends BaseFactory
 
         $output = parent::renderComponent();
 
-        $templateId = $componentData['spladeBridge']['template_hash'];
+        $spladeBridge = $componentData['spladeBridge'];
+
+        $templateId = $spladeBridge['template_hash'];
 
         if (static::$trackSpladeComponents) {
             static::$spladeComponents[$templateId] = $output;
@@ -124,20 +136,40 @@ class Factory extends BaseFactory
 
         $this->pushSpladeTemplate($templateId, $output);
 
-        $spladeBridge = Js::from($componentData['spladeBridge'])->toHtml();
+        foreach (['data', 'props', 'functions'] as $key) {
+            if ($spladeBridge[$key] instanceof ResolveOnce) {
+                $spladeBridge[$key] = $spladeBridge[$key]();
+            }
+        }
 
-        collect($componentData['spladeBridge']['props'])->each(function ($specs, $key) use ($attributes) {
+        $spladeBridgeHtml = Js::from(Arr::only($spladeBridge, [
+            'instance',
+            'invoke_url',
+            'original_url',
+            'original_verb',
+            'signature',
+            'tag',
+            'template_hash',
+            'data',
+            // 'props',
+            // 'functions',
+            // 'response',
+        ]))->toHtml();
+
+        collect($spladeBridge['props'])->each(function ($specs, $key) use ($attributes) {
             if (! str_starts_with($key, 'v-bind:')) {
                 $key = 'v-bind:'.Str::kebab($key);
             }
 
-            $attributes[$key] = Js::from($specs->value)->toHtml();
+            $attributes[$key] = $specs->raw
+                ? $specs->value
+                : Js::from($specs->value)->toHtml();
         });
 
         $attrs = $attributes->toHtml();
 
         return static::$trackSpladeComponents
-            ? "<!--splade-template-id=\"{$templateId}\"--><generic-splade-component {$attrs} :bridge=\"{$spladeBridge}\"></generic-splade-component>"
-            : "<generic-splade-component {$attrs} :bridge=\"{$spladeBridge}\"></generic-splade-component>";
+            ? "<!--splade-template-id=\"{$templateId}\"--><generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\"></generic-splade-component>"
+            : "<generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\"></generic-splade-component>";
     }
 }

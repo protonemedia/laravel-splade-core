@@ -21,7 +21,7 @@ class ComponentControllerTest extends TestCase
             'template_hash' => md5('hash'),
             'original_url' => url('/change-blade-prop'),
             'original_verb' => 'GET',
-        ], $with));
+        ], $with), true);
     }
 
     /** @test */

@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use League\Fractal\TransformerAbstract;
 use Spatie\Fractalistic\ArraySerializer;
 use Spatie\Fractalistic\Fractal;
+use stdClass;
 use Traversable;
 
 class TransformerRepository
@@ -73,6 +74,11 @@ class TransformerRepository
     {
         if (is_array($value) || $value instanceof Traversable) {
             return $this->canBeTransformed(Arr::first($value));
+        }
+
+        // check if object is empty stdClass
+        if (is_object($value) && $value instanceof stdClass && $value == new stdClass) {
+            return false;
         }
 
         return is_object($value);

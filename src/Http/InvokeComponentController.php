@@ -57,7 +57,7 @@ class InvokeComponentController
             'original_url' => $validated['original_url'],
             'original_verb' => $validated['original_verb'],
             'template_hash' => $validated['template_hash'],
-        ]);
+        ], true);
 
         return response()->json($data);
     }

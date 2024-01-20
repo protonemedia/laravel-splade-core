@@ -1,15 +1,20 @@
 <script setup>
 import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
-const message = ref('Hello Vue!')
-const reversed = computed(() => message.value.split('').reverse().join(''))
+import { Dialog, DialogPanel, TransitionRoot, TransitionChild } from '@headlessui/vue'
+
+const openend = ref(false)
+
+function show() {
+    openend.value = true
+}
 const spladeRender = {
-    name: 'SpladeComponentAnonymousRender',
-    components: { GenericSpladeComponent },
+    name: 'SpladeComponentComponentImportRender',
+    components: { GenericSpladeComponent, Dialog, DialogPanel, TransitionRoot, TransitionChild },
     template: spladeTemplates[props.spladeTemplateId],
     data: () => {
-        return { message, reversed }
+        return { openend, show }
     },
     props: { spladeBridge: Object, spladeTemplateId: String },
 }

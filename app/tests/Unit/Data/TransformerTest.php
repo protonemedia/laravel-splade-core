@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use ProtoneMedia\SpladeCore\Data\InvalidTransformerException;
 use ProtoneMedia\SpladeCore\Data\TransformerRepository;
 use ProtoneMedia\SpladeCore\Facades\Transformer;
+use stdClass;
 use Tests\TestCase;
 use Tests\Unit\Transformers\UserResource;
 use Tests\Unit\Transformers\UserTransformer;
@@ -28,6 +29,14 @@ class TransformerTest extends TestCase
         $user = User::firstOrFail();
 
         $this->assertTrue(Transformer::handle($user)->is($user));
+    }
+
+    /** @test */
+    public function it_wont_transform_an_empty_std_class_object()
+    {
+        $result = Transformer::enforce()->handle($source = new stdClass);
+
+        $this->assertEquals($source, $result);
     }
 
     /** @test */

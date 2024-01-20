@@ -32,6 +32,8 @@ class BuildComponentsTest extends TestCase
             'IncludedView',
             'RegularView',
             'ComponentToVueProp',
+            'ComponentComponentImport',
+            'ComponentDynamicComponentImport',
         ] as $component) {
             $this->assertFileExists(resource_path('js/splade/Splade'.$component.'.vue'));
             $this->assertMatchesVueSnapshot($filesytem->get(resource_path('js/splade/Splade'.$component.'.vue')));

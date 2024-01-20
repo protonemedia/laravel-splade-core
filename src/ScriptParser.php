@@ -11,6 +11,7 @@ use Peast\Syntax\Node\ArrayPattern;
 use Peast\Syntax\Node\CallExpression;
 use Peast\Syntax\Node\FunctionDeclaration;
 use Peast\Syntax\Node\Identifier;
+use Peast\Syntax\Node\ImportDeclaration;
 use Peast\Syntax\Node\ObjectExpression;
 use Peast\Syntax\Node\ObjectPattern;
 use Peast\Syntax\Node\Program;
@@ -22,7 +23,7 @@ class ScriptParser
 {
     protected Program $rootNode;
 
-    protected string $scriptWithoutImports;
+    protected string $script;
 
     protected array $vueFunctions = [
         'computed',
@@ -49,19 +50,11 @@ class ScriptParser
 
     public function __construct(string $script)
     {
-        $this->scriptWithoutImports = trim($this->removeImports($script));
+        $this->script = $script;
 
-        $this->rootNode = Peast::latest($this->scriptWithoutImports)->parse();
-    }
-
-    /**
-     * Removes the import statements from the script.
-     */
-    protected function removeImports(string $script): string
-    {
-        return Collection::make(explode(PHP_EOL, $script))
-            ->filter(fn ($line) => ! str_starts_with(trim($line), 'import '))
-            ->implode(PHP_EOL);
+        $this->rootNode = Peast::latest($this->script, [
+            'sourceType' => \Peast\Peast::SOURCE_TYPE_MODULE,
+        ])->parse();
     }
 
     /**
@@ -104,16 +97,20 @@ class ScriptParser
      * Returns the defineProps() call expression and additionally merges
      * the given props with the ones that are defined in the script.
      */
-    public function getDefineProps(array $mergeWith = []): array
+    public function getDefineProps(array $mergeWith = []): DefineVueProps
     {
+        $defineVueProps = new DefineVueProps;
+
         foreach ($this->rootNode->query('CallExpression[callee.name="defineProps"]') as $node) {
             /** @var CallExpression $node */
-            $definePropsScript = collect(explode(PHP_EOL, $this->scriptWithoutImports))
+            $definePropsScript = collect(explode(PHP_EOL, $this->script))
                 ->filter(function (string $contents, int $line) use ($node) {
                     return $line >= ($node->getLocation()->getStart()->getLine() - 1)
                         && $line <= ($node->getLocation()->getEnd()->getLine() - 1);
                 })
                 ->implode(PHP_EOL);
+
+            $defineVueProps->setOriginalScript($definePropsScript);
 
             $firstArgument = $node->getArguments()[0] ?? null;
             $newPropsObject = '{}';
@@ -121,15 +118,21 @@ class ScriptParser
             if ($firstArgument instanceof ArrayExpression) {
                 $props = collect($firstArgument->getElements())
                     ->map(fn (StringLiteral $element) => $element->getValue())
-                    ->mapWithKeys(fn (string $prop) => [$prop => ''])
+                    ->mapWithKeys(function (string $prop) use ($defineVueProps) {
+                        $defineVueProps->addPropKey($prop);
+
+                        return [$prop => ''];
+                    })
                     ->merge($mergeWith)
                     ->pipe(fn (Collection $props) => $this->toPropsObjectDefinition($props));
 
                 $newPropsObject = "{{$props}}";
             } elseif ($firstArgument instanceof ObjectExpression) {
                 $props = collect($firstArgument->getProperties())
-                    ->mapWithKeys(function (Property $property) {
+                    ->mapWithKeys(function (Property $property) use ($defineVueProps) {
                         $key = $property->getKey()->getName();
+
+                        $defineVueProps->addPropKey($key);
 
                         if ($property->getValue() instanceof Identifier) {
                             return [$key => $property->getValue()->getName()];
@@ -149,18 +152,23 @@ class ScriptParser
                 $newPropsObject = "{{$props}}";
             }
 
-            return [
-                'original' => trim($definePropsScript),
-                'new' => "const props = defineProps({$newPropsObject});",
-            ];
+            foreach (array_keys($mergeWith) as $key) {
+                $defineVueProps->addPropKey($key);
+            }
+
+            return $defineVueProps->setNewProjectObject($newPropsObject);
         }
 
-        $keys = $this->toPropsObjectDefinition($mergeWith);
+        foreach (array_keys($mergeWith) as $key) {
+            $defineVueProps->addPropKey($key);
+        }
 
-        return [
-            'original' => '',
-            'new' => 'const props = defineProps({'.$keys.'});',
-        ];
+        return $defineVueProps
+            ->setOriginalScript('')
+            ->setNewProjectObject(
+                '{'.$this->toPropsObjectDefinition($mergeWith).'}'
+            );
+
     }
 
     /**
@@ -198,5 +206,27 @@ class ScriptParser
         }
 
         return $variables->merge($additionalItems)->unique()->sort()->values();
+    }
+
+    /**
+     * Returns an array of all imports.
+     */
+    public function getImports(): array
+    {
+        $imports = [];
+
+        // find ImportDeclaration
+        foreach ($this->rootNode->query('ImportDeclaration') as $node) {
+            /** @var ImportDeclaration $node */
+            $source = $node->getSource()->getValue();
+
+            // find ImportSpecifier
+            foreach ($node->getSpecifiers() as $specifier) {
+                /** @var ImportSpecifier $specifier */
+                $imports[$specifier->getLocal()->getName()] = $source;
+            }
+        }
+
+        return $imports;
     }
 }

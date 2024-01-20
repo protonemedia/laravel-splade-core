@@ -13,7 +13,9 @@ class PropsTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $browser->visit('/props-in-template')
                 ->assertSeeIn('h2', 'Default title')
-                ->assertSeeIn('h3', 'Default subtitle');
+                ->assertSeeIn('h3', 'Default subtitle')
+                ->press('Update title')
+                ->assertSeeIn('h2', 'New title');
         });
     }
 }

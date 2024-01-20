@@ -24,7 +24,7 @@ class InstallNewApp extends Command
 
         $this->updateNodePackages(function (array $packages) {
             return [
-                '@protonemedia/laravel-splade-core' => '^1.1.0',
+                '@protonemedia/laravel-splade-core' => '^3.0.0',
                 '@protonemedia/laravel-splade-vite' => '^2.0.0',
                 '@vitejs/plugin-vue' => '^4.4.0',
                 'axios' => '^1.1.2',

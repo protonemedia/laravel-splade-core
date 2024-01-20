@@ -1,33 +1,83 @@
 <script setup>
 import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
-import { h } from 'vue'
+import {} from 'vue'
 const props = defineProps({
     spladeBridge: Object,
     spladeTemplateId: String,
-    mixed: { default: 'foo' },
-    string: { type: String, default: 'foo' },
-    defaultString: { type: String, default: 'foo' },
-    nullableString: { type: String, default: null },
-    int: { type: Number, default: null },
-    bool: { type: Boolean, default: null },
-    array: { type: Array, default: null },
-    object: { type: Object, default: null },
-    nullableInt: { type: Number, default: null },
-    nullableBool: { type: Boolean, default: null },
-    nullableArray: { type: Array, default: null },
-    nullableObject: { type: Object, default: null },
-    defaultInt: { type: Number, default: 1 },
-    defaultBool: { type: Boolean, default: true },
-    defaultArray: { type: Array, default: JSON.parse('[\u0022foo\u0022]') },
-    multipleTypes: { type: [Array, String, Boolean], default: JSON.parse('[\u0022foo\u0022]') },
+    mixed: {},
+    string: { type: String },
+    defaultString: { type: String },
+    nullableString: { type: String },
+    int: { type: Number },
+    bool: { type: Boolean },
+    array: { type: Array },
+    object: { type: Object },
+    nullableInt: { type: Number },
+    nullableBool: { type: Boolean },
+    nullableArray: { type: Array },
+    nullableObject: { type: Object },
+    defaultInt: { type: Number },
+    defaultBool: { type: Boolean },
+    defaultArray: { type: Array },
+    multipleTypes: { type: [Array, String, Boolean] },
+    renamed: { type: String },
+    jsObject: {},
+    dataFromMethod: { type: Array },
 })
-const spladeRender = h({
+const spladeRender = {
     name: 'SpladeComponentToVuePropRender',
     components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
     data: () => {
-        return { ...props }
+        return {}
     },
-})
+    props: {
+        spladeBridge: Object,
+        spladeTemplateId: String,
+        mixed: {},
+        string: { type: String },
+        defaultString: { type: String },
+        nullableString: { type: String },
+        int: { type: Number },
+        bool: { type: Boolean },
+        array: { type: Array },
+        object: { type: Object },
+        nullableInt: { type: Number },
+        nullableBool: { type: Boolean },
+        nullableArray: { type: Array },
+        nullableObject: { type: Object },
+        defaultInt: { type: Number },
+        defaultBool: { type: Boolean },
+        defaultArray: { type: Array },
+        multipleTypes: { type: [Array, String, Boolean] },
+        renamed: { type: String },
+        jsObject: {},
+        dataFromMethod: { type: Array },
+    },
+}
 </script>
-<template><spladeRender /></template>
+<template>
+    <spladeRender
+        :splade-bridge="spladeBridge"
+        :splade-template-id="spladeTemplateId"
+        :mixed="mixed"
+        :string="string"
+        :default-string="defaultString"
+        :nullable-string="nullableString"
+        :int="int"
+        :bool="bool"
+        :array="array"
+        :object="object"
+        :nullable-int="nullableInt"
+        :nullable-bool="nullableBool"
+        :nullable-array="nullableArray"
+        :nullable-object="nullableObject"
+        :default-int="defaultInt"
+        :default-bool="defaultBool"
+        :default-array="defaultArray"
+        :multiple-types="multipleTypes"
+        :renamed="renamed"
+        :js-object="jsObject"
+        :data-from-method="dataFromMethod"
+    />
+</template>

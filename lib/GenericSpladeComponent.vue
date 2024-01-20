@@ -1,5 +1,5 @@
 <script setup>
-import { computed, h, inject, ref, onUnmounted } from "vue";
+import { computed, inject, ref, onUnmounted } from "vue";
 
 const props = defineProps({
     bridge: {
@@ -23,12 +23,12 @@ onUnmounted(() => {
     eventBus.off(`template:${templateId}`, updateTemplate);
 });
 
-const render = computed(() =>
-    h({
+const render = computed(() => {
+    return {
         template: template.value,
         name: "GenericSpladeComponentRender",
-    }),
-);
+    };
+});
 </script>
 
 <template>

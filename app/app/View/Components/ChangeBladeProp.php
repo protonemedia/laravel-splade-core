@@ -5,6 +5,7 @@ namespace App\View\Components;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use ProtoneMedia\SpladeCore\Attributes\Vue;
 use ProtoneMedia\SpladeCore\Attributes\VueRef;
 
 class ChangeBladeProp extends Component
@@ -17,7 +18,7 @@ class ChangeBladeProp extends Component
     ) {
     }
 
-    #[VueRef]
+    #[Vue]
     public function setMessage(string $message)
     {
         $this->message = 'From the inside: '.$message;

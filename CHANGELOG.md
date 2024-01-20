@@ -2,6 +2,14 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 3.2.0 - 2024-01-20
+
+### What's Changed
+
+* Added PHP 8.3 to test suite by @pascalbaljet in https://github.com/protonemedia/laravel-splade-core/pull/15
+
+**Full Changelog**: https://github.com/protonemedia/laravel-splade-core/compare/3.1.1...3.2.0
+
 ## 3.1.1 - 2024-01-20
 
 * Added `vue` macro to `ComponentAttributeBag` class
@@ -65,6 +73,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 
 

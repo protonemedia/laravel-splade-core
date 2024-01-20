@@ -8,8 +8,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Js;
+use Illuminate\Support\Str;
 use Illuminate\View\Compilers\ComponentTagCompiler;
 use Illuminate\View\Component;
+use Illuminate\View\ComponentAttributeBag;
 use Illuminate\View\DynamicComponent;
 use Illuminate\View\Engines\EngineResolver;
 use ProtoneMedia\SpladeCore\Commands\BuildComponents;
@@ -45,6 +48,7 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
         $this->registerComponentHelper();
         $this->registerBladeEngine();
         $this->registerFactory();
+        $this->registerComponentAttributeBagMacro();
 
         $this->app->singleton(SpladeCoreRequest::class, function (Application $app) {
             return new SpladeCoreRequest(fn () => $app['request']);
@@ -158,6 +162,41 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
             if ($event->command === 'view:clear') {
                 Artisan::call(ClearComponents::class);
             }
+        });
+    }
+
+    protected function registerComponentAttributeBagMacro()
+    {
+        ComponentAttributeBag::macro('vue', function ($attribute, $value = null, bool $omitBlankValue = true, bool $escape = true) {
+            /** @var ComponentAttributeBag $this */
+            if ($omitBlankValue && blank($value)) {
+                return $this;
+            }
+
+            $isEvent = Str::startsWith($attribute, ['@', 'v-on:']);
+            $isBinding = Str::startsWith($attribute, [':', 'v-bind:']);
+
+            if (! $isEvent && ! $isBinding) {
+                return $this->merge([$attribute => $value], $escape);
+            }
+
+            foreach (['@', 'v-on:', ':', 'v-bind:'] as $modifier) {
+                if (Str::startsWith($attribute, $modifier)) {
+                    $attribute = Str::substr($attribute, strlen($modifier));
+                }
+            }
+
+            $shortBindAttribute = ($isEvent ? '@' : ':').$attribute;
+            $fullBindAttribute = ($isEvent ? 'v-on:' : 'v-bind:').$attribute;
+
+            return $this->unless($this->has($shortBindAttribute) || $this->has($fullBindAttribute), function () use ($fullBindAttribute, $value, $escape) {
+                if (is_array($value) || is_bool($value) || is_object($value)) {
+                    $value = Js::from($value)->toHtml();
+                }
+
+                /** @var ComponentAttributeBag $this */
+                return $this->merge([$fullBindAttribute => $value], $escape);
+            });
         });
     }
 }

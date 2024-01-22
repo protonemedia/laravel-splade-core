@@ -22,11 +22,11 @@ class RenderViewAsVueComponent
         return new static($viewWithoutScript, $componentHelper->getTag($path), $rootLayoutTags);
     }
 
-    public function render(string $templateId): string
+    public function render(string $templateId, string $result): string
     {
         $tag = Str::kebab($this->tag);
 
-        $component = "<{$tag} splade-template-id=\"{$templateId}\"></{$tag}>";
+        $component = "<{$tag} splade-template-id=\"{$templateId}\">{$result}</{$tag}>";
 
         if (empty($this->rootLayoutTags)) {
             return $component;

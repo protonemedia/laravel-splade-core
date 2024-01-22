@@ -2,9 +2,6 @@
 
 namespace ProtoneMedia\SpladeCore;
 
-use Illuminate\Support\Str;
-use Illuminate\View\ComponentAttributeBag;
-
 class DefineVueProps
 {
     private string $originalScript = '';
@@ -63,16 +60,5 @@ class DefineVueProps
             'new' => $this->getNewPropsObject(),
             'keys' => $this->getPropKeys(),
         ];
-    }
-
-    public function toAttributeBag(): ComponentAttributeBag
-    {
-        $attrs = collect($this->getPropKeys())->mapWithKeys(function (string $prop) {
-            $key = Str::kebab($prop);
-
-            return ['v-bind:'.$key => $prop];
-        })->all();
-
-        return new ComponentAttributeBag($attrs);
     }
 }

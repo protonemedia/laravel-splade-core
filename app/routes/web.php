@@ -21,7 +21,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::view('/slot', 'slot');
 
 Route::view('/anonymous', 'anonymous');
 Route::view('/base-view', 'base-view');
@@ -37,6 +36,7 @@ Route::view('/props-in-template', 'props-in-template');
 Route::view('/refresh', 'refresh')->middleware(Refreshable::class);
 Route::view('/refresh-state', 'refresh-state')->middleware(Refreshable::class);
 Route::view('/regular-view', 'regular-view');
+Route::view('/slot', 'slot');
 Route::view('/to-vue-prop', 'to-vue-prop');
 Route::view('/two-way-binding', 'two-way-binding');
 

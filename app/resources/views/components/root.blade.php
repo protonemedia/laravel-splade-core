@@ -1,8 +1,11 @@
 <script setup>
     const count = ref(0)
 
+    const emit = defineEmits(['incremented'])
+
     function increment() {
         count.value++
+        emit('incremented')
     }
 </script>
 

@@ -110,7 +110,7 @@ class BladeViewExtractor
             ->mapWithKeys(function (string $prop) {
                 $key = Str::kebab($prop);
 
-                return ['v-bind:'.$key => $prop];
+                return [':'.$key => $prop];
             })
             ->when($this->viewUsesElementRefs(), fn (Collection $collection) => $collection->put('v-bind:set-splade-ref', 'setSpladeRef'))
             ->pipe(fn (Collection $collection) => new ComponentAttributeBag($collection->all()));

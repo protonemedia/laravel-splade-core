@@ -171,7 +171,7 @@ class Factory extends BaseFactory
         $tag = $spladeBridge['tag'];
         $kebabTag = Str::kebab($tag);
 
-        return "<{$kebabTag}>{$output}</{$kebabTag}>";
+        return "<{$kebabTag} {$attrs}>{$output}</{$kebabTag}>";
 
         return static::$trackSpladeComponents
             ? "<!--splade-template-id=\"{$templateId}\"--><generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\"></generic-splade-component>"

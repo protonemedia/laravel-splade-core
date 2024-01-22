@@ -186,6 +186,12 @@ class ScriptParser
                 foreach ($node->getDeclarations() as $declaration) {
                     $id = $declaration->getId();
 
+                    if ($id->getName() === 'emit') {
+                        if ($declaration->getInit()->getCallee()->getName() === 'defineEmits') {
+                            continue;
+                        }
+                    }
+
                     if ($id instanceof Identifier) {
                         $add($id);
                     } elseif ($id instanceof ObjectPattern) {

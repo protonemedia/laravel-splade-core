@@ -1,5 +1,5 @@
 <script setup>
-import { Dialog, DialogPanel, TransitionRoot, TransitionChild } from "@headlessui/vue";
+import { Dialog, TransitionRoot, DialogPanel, TransitionChild } from "@headlessui/vue";
 
 const openend = ref(false);
 

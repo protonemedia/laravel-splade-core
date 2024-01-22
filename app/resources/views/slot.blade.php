@@ -1,7 +1,13 @@
-@extends('layout')
+<x-layout>
+    <script setup>
+        const layoutCounter = ref(0)
 
-@section('content')
+        function onIncremented () {
+            layoutCounter.value++
+        }
+    </script>
 
-    <x-root />
+    <h2>Layout counter: <span v-html="layoutCounter" /></h2>
 
-@endsection
+    <x-root @incremented="onIncremented" />
+</x-layout>

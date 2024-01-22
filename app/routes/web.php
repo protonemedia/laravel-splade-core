@@ -21,7 +21,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
 Route::view('/anonymous', 'anonymous');
 Route::view('/base-view', 'base-view');
 Route::view('/blade-method', 'blade-method');

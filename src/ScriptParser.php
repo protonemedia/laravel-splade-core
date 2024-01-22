@@ -179,7 +179,10 @@ class ScriptParser
         $variables = Collection::make();
         $nodes = Collection::make();
 
-        $add = fn (Identifier $node) => $variables->push($node->getName()) && $nodes->push($node);
+        $add = function (Identifier $node) use ($variables, $nodes) {
+            $variables->push($node->getName());
+            $nodes->push($node);
+        };
 
         foreach ($this->rootNode->getBody() as $node) {
             if ($node instanceof VariableDeclaration) {
@@ -187,6 +190,12 @@ class ScriptParser
                     $id = $declaration->getId();
 
                     if ($id instanceof Identifier) {
+                        if ($id->getName() === 'emit') {
+                            if ($declaration->getInit()->getCallee()->getName() === 'defineEmits') {
+                                continue;
+                            }
+                        }
+
                         $add($id);
                     } elseif ($id instanceof ObjectPattern) {
                         foreach ($id->getProperties() as $property) {

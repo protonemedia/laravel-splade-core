@@ -26,7 +26,7 @@ class RenderViewAsVueComponent
     {
         $tag = Str::kebab($this->tag);
 
-        $component = "<{$tag} splade-template-id=\"{$templateId}\"></{$tag}>";
+        $component = "<{$tag}></{$tag}>";
 
         if (empty($this->rootLayoutTags)) {
             return $component;
@@ -34,10 +34,10 @@ class RenderViewAsVueComponent
 
         $rootLayout = Blade::render(<<<HTML
 {$this->rootLayoutTags[0]}
-###SPLADE-INJECT-HERE###
+###SPLADE-INJECT-SLOT-HERE###
 {$this->rootLayoutTags[1]}
 HTML);
 
-        return str_replace('###SPLADE-INJECT-HERE###', $component, $rootLayout);
+        return str_replace('###SPLADE-INJECT-SLOT-HERE###', $component, $rootLayout);
     }
 }

@@ -65,9 +65,9 @@ class DefineVueProps
         ];
     }
 
-    public function toAttributeBag(): ComponentAttributeBag
+    public function toAttributeBag(array $with = []): ComponentAttributeBag
     {
-        $attrs = collect($this->getPropKeys())->mapWithKeys(function (string $prop) {
+        $attrs = collect($this->getPropKeys())->merge($with)->mapWithKeys(function (string $prop) {
             $key = Str::kebab($prop);
 
             return ['v-bind:'.$key => $prop];

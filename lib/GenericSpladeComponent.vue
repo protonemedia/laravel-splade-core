@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, ref, onUnmounted } from "vue";
+import { inject, ref, onUnmounted } from "vue";
 
 const props = defineProps({
     bridge: {
@@ -22,15 +22,8 @@ eventBus.on(`template:${templateId}`, updateTemplate);
 onUnmounted(() => {
     eventBus.off(`template:${templateId}`, updateTemplate);
 });
-
-const render = computed(() => {
-    return {
-        template: template.value,
-        name: "GenericSpladeComponentRender",
-    };
-});
 </script>
 
 <template>
-    <render :splade-bridge="bridge" :splade-template-id="templateId"></render>
+    <slot />
 </template>

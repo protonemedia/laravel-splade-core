@@ -156,6 +156,8 @@ class Factory extends BaseFactory
             // 'response',
         ]))->toHtml();
 
+        $tag = $spladeBridge['tag'];
+
         collect($spladeBridge['props'])->each(function ($specs, $key) use ($attributes) {
             if (! str_starts_with($key, 'v-bind:')) {
                 $key = 'v-bind:'.Str::kebab($key);
@@ -166,10 +168,19 @@ class Factory extends BaseFactory
                 : Js::from($specs->value)->toHtml();
         });
 
+        $slotProps = collect($spladeBridge['props'])
+            ->keys()
+            ->map(fn ($key) => Str::camel($key))
+            ->implode(',');
+
         $attrs = $attributes->toHtml();
 
+        $tag = Str::kebab($tag);
+
+        // dd($spladeBridge);
+
         return static::$trackSpladeComponents
-            ? "<!--splade-template-id=\"{$templateId}\"--><generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\"></generic-splade-component>"
-            : "<generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\"></generic-splade-component>";
+            ? "<generic-splade-component :bridge=\"{$spladeBridgeHtml}\"><{$tag} {$attrs}>{$output}</{$tag}></generic-splade-component>"
+            : "<generic-splade-component :bridge=\"{$spladeBridgeHtml}\"><{$tag} {$attrs}>{$output}</{$tag}></generic-splade-component>";
     }
 }

@@ -99,6 +99,19 @@ class BladeViewExtractor
         ];
     }
 
+    private function getDataObject(): Collection
+    {
+        $importedComponents = $this->getImportedComponents();
+
+        return Collection::make()
+            ->merge($this->getBladeProperties())
+            ->merge($this->scriptParser->getVariables()->reject(fn ($variable) => $variable === 'props'))
+            ->merge($this->getBladeFunctions())
+            ->when($this->isRefreshable(), fn (Collection $collection) => $collection->push('refreshComponent'))
+            ->when($this->viewUsesElementRefs(), fn (Collection $collection) => $collection->push('setSpladeRef'))
+            ->merge($importedComponents['dynamic']);
+    }
+
     /**
      * Handle the extraction of the Vue script. Returns the view without the <script setup> tag.
      */
@@ -123,7 +136,10 @@ class BladeViewExtractor
 
         // Adjust the current defineProps, or generate a new one if it didn't exist yet.
         $defineVueProps = $this->extractDefinePropsFromScript();
-        $propsBag = $defineVueProps->toAttributeBag();
+
+        $propsBag = $defineVueProps->toAttributeBag(
+            $this->getDataObject()->all()
+        );
 
         $vueComponent = implode(PHP_EOL, array_filter([
             '<script setup>',
@@ -135,9 +151,9 @@ class BladeViewExtractor
             $this->renderJavascriptFunctionToRefreshComponent(),
             $this->renderElementRefStoreAndSetter(),
             $defineVueProps->getOriginalScript(),
-            $this->renderSpladeRenderFunction($defineVueProps),
+            // $this->renderSpladeRenderFunction($defineVueProps),
             '</script>',
-            "<template><spladeRender {$propsBag->toHtml()} /></template>",
+            "<template><slot {$propsBag->toHtml()} /></template>",
         ]));
 
         $directory = config('splade-core.compiled_scripts');
@@ -148,7 +164,13 @@ class BladeViewExtractor
             Process::path(base_path())->run("node_modules/.bin/eslint --fix {$vuePath}");
         }
 
-        return $this->viewWithoutScriptTag;
+        $dataObject = $this->getDataObject()->implode(',');
+
+        return <<<HTML
+<template #default="{{$dataObject}}">
+{$this->viewWithoutScriptTag}
+</template>
+HTML;
     }
 
     /**
@@ -545,7 +567,7 @@ const spladeRender = {
     {$inheritAttrs}
     name: "{$this->getTag()}Render",
     {$componentsObject}
-    template: spladeTemplates[props.spladeTemplateId],
+    template: '<slot />',
     data: () => { return { {$dataObject} } },
     props: {$definePropsObject},
 };

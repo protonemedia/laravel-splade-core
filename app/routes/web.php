@@ -31,6 +31,7 @@ Route::view('/dynamic', 'dynamic')->withoutMiddleware(SubstituteBindings::class)
 Route::view('/dynamic-component-import', 'dynamic-component-import');
 Route::view('/emit', 'emit');
 Route::view('/form', 'form');
+Route::view('/nested', 'nested');
 Route::view('/props-in-template', 'props-in-template');
 Route::view('/refresh', 'refresh')->middleware(Refreshable::class);
 Route::view('/refresh-state', 'refresh-state')->middleware(Refreshable::class);

@@ -116,7 +116,7 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
                 $app['files'],
                 $app['config']['view.compiled'],
                 $app['config']->get('view.relative_hash', false) ? $app->basePath() : '',
-                $app['config']->get('view.cache', true),
+                $app['config']->get('view.cache', false),
                 $app['config']->get('view.compiled_extension', 'php'),
             ), function (BladeCompiler $blade) {
                 $blade->component('dynamic-component', DynamicComponent::class);

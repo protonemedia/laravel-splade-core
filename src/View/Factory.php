@@ -168,6 +168,11 @@ class Factory extends BaseFactory
 
         $attrs = $attributes->toHtml();
 
+        $tag = $spladeBridge['tag'];
+        $kebabTag = Str::kebab($tag);
+
+        return "<{$kebabTag}>{$output}</{$kebabTag}>";
+
         return static::$trackSpladeComponents
             ? "<!--splade-template-id=\"{$templateId}\"--><generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\"></generic-splade-component>"
             : "<generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\"></generic-splade-component>";

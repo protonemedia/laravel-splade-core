@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
+use Illuminate\View\ComponentAttributeBag;
 use InvalidArgumentException;
 use ProtoneMedia\SpladeCore\Facades\SpladePlugin;
 
@@ -21,6 +22,8 @@ class BladeViewExtractor
     protected ComponentHelper $componentHelper;
 
     protected ScriptParser $scriptParser;
+
+    protected ?DefineVueProps $defineVueProps = null;
 
     protected ?array $importedComponents = null;
 
@@ -99,6 +102,20 @@ class BladeViewExtractor
         ];
     }
 
+    private function slotAttributes(): ComponentAttributeBag
+    {
+        return collect()
+            ->merge($this->extractDefinePropsFromScript()->getPropKeys())
+            ->merge($this->dataObject())
+            ->mapWithKeys(function (string $prop) {
+                $key = Str::kebab($prop);
+
+                return ['v-bind:'.$key => $prop];
+            })
+            ->when($this->viewUsesElementRefs(), fn (Collection $collection) => $collection->put('v-bind:set-splade-ref', 'setSpladeRef'))
+            ->pipe(fn (Collection $collection) => new ComponentAttributeBag($collection->all()));
+    }
+
     /**
      * Handle the extraction of the Vue script. Returns the view without the <script setup> tag.
      */
@@ -123,7 +140,8 @@ class BladeViewExtractor
 
         // Adjust the current defineProps, or generate a new one if it didn't exist yet.
         $defineVueProps = $this->extractDefinePropsFromScript();
-        $propsBag = $defineVueProps->toAttributeBag();
+
+        $slotAttributes = $this->slotAttributes()->toHtml();
 
         $vueComponent = implode(PHP_EOL, array_filter([
             '<script setup>',
@@ -135,9 +153,9 @@ class BladeViewExtractor
             $this->renderJavascriptFunctionToRefreshComponent(),
             $this->renderElementRefStoreAndSetter(),
             $defineVueProps->getOriginalScript(),
-            $this->renderSpladeRenderFunction($defineVueProps),
+            // $this->renderSpladeRenderFunction($defineVueProps),
             '</script>',
-            "<template><spladeRender {$propsBag->toHtml()} /></template>",
+            "<template><slot {$slotAttributes} /></template>",
         ]));
 
         $directory = config('splade-core.compiled_scripts');
@@ -148,7 +166,14 @@ class BladeViewExtractor
             Process::path(base_path())->run("node_modules/.bin/eslint --fix {$vuePath}");
         }
 
-        return $this->viewWithoutScriptTag;
+        $dataObject = collect($this->slotAttributes()->getAttributes())
+            ->implode(',');
+
+        return <<<HTML
+ <template #default="{{$dataObject}}">
+ {$this->viewWithoutScriptTag}
+ </template>
+ HTML;
     }
 
     /**
@@ -319,6 +344,10 @@ class BladeViewExtractor
      */
     protected function extractDefinePropsFromScript(): DefineVueProps
     {
+        if ($this->defineVueProps) {
+            return $this->defineVueProps;
+        }
+
         $bladePropsAsVueProps = Collection::make($this->getBladePropsThatArePassedAsVueProps())
             ->map(function (object $specs) {
                 $type = null;
@@ -346,7 +375,7 @@ class BladeViewExtractor
             );
         }
 
-        return $defineVueProps;
+        return $this->defineVueProps = $defineVueProps;
     }
 
     /**
@@ -508,6 +537,20 @@ JS;
         return $this->importedComponents;
     }
 
+    private function dataObject(): Collection
+    {
+        $importedComponents = $this->getImportedComponents();
+
+        return Collection::make()
+            ->merge($this->getBladeProperties())
+            ->merge($this->scriptParser->getVariables()->reject(fn ($variable) => $variable === 'props'))
+            ->merge($this->getBladeFunctions())
+            ->when($this->isRefreshable(), fn (Collection $collection) => $collection->push('refreshComponent'))
+            ->when($this->viewUsesElementRefs(), fn (Collection $collection) => $collection->push('setSpladeRef'))
+            ->merge($importedComponents['static'])
+            ->merge($importedComponents['dynamic']);
+    }
+
     /**
      * Renders the SpladeRender 'h'-function.
      */
@@ -519,16 +562,7 @@ JS : '';
 
         $importedComponents = $this->getImportedComponents();
 
-        $dataObject = Collection::make()
-            ->merge($this->getBladeProperties())
-            ->merge($this->scriptParser->getVariables()->reject(fn ($variable) => $variable === 'props'))
-            ->merge($this->getBladeFunctions())
-            ->when($this->isRefreshable(), fn (Collection $collection) => $collection->push('refreshComponent'))
-            ->when($this->viewUsesElementRefs(), fn (Collection $collection) => $collection->push('setSpladeRef'))
-            ->merge($importedComponents['dynamic']->map(function (string $component) {
-                return "{$component}: markRaw({$component})";
-            }))
-            ->implode(',');
+        $dataObject = $this->dataObject()->implode(',');
 
         $components = Collection::make([
             'GenericSpladeComponent', ...$importedComponents['static'],

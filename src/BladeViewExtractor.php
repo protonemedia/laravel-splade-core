@@ -359,7 +359,6 @@ class BladeViewExtractor
             ->when($this->needsSpladeBridge(), fn ($collection) => $collection->push('ref'))
             ->when($this->isRefreshable(), fn ($collection) => $collection->push('inject'))
             ->when($this->isComponent() && ! empty($this->getBladeProperties()), fn ($collection) => $collection->push('computed'))
-            ->push('useSlots')
             ->unique()
             ->sort()
             ->implode(',');
@@ -376,7 +375,12 @@ import { {$vueFunctionsImports} } from 'vue';
 JS;
         }
 
-        return <<<JS
+        $dev = true;
+
+        return $dev ? <<<JS
+import { {$spladeCoreImports} } from '../../../../dist/protone-media-laravel-splade-core'
+import { {$vueFunctionsImports} } from 'vue';
+JS : <<<JS
 import { {$spladeCoreImports} } from '@protonemedia/laravel-splade-core'
 import { {$vueFunctionsImports} } from 'vue';
 JS;
@@ -542,8 +546,6 @@ JS : '';
         $definePropsObject = $defineVueProps->getNewPropsObject();
 
         return <<<JS
-        const slots = useSlots();
-        console.log("{$this->getTag()}Render", slots);
 const spladeRender = {
     {$inheritAttrs}
     name: "{$this->getTag()}Render",

@@ -197,9 +197,11 @@ class Factory extends BaseFactory
         if (str_contains($output, '<h2>Parent component</h2>')) {
             $content = $this->originalSlots[0]['__default']->toHtml();
 
-            $output = str_replace('</splade-component-child>', '', $output);
-            $output .= '<template #default>'.$content.'</template>';
-            $output .= '</splade-component-child>';
+            $output = str_replace('<slot />', $content, $output);
+
+            // $output = str_replace('</generic-splade-component>', '', $output);
+            // $output .= '<template #default>'.$content.'</template>';
+            // $output .= '</generic-splade-component>';
         }
 
         if (str_contains($output, '<h2>Child component</h2>')) {
@@ -208,10 +210,12 @@ class Factory extends BaseFactory
 
         $this->pushSpladeTemplate($templateId, $output);
 
-        $tag = Str::kebab($spladeBridge['tag']);
+        $genericComponent = "<generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\">
+            <template #default><slot /></template>
+        </generic-splade-component>";
 
         return static::$trackSpladeComponents
-            ? "<{$tag} {$attrs} splade-template-id=\"{$templateId}\" :splade-bridge=\"{$spladeBridgeHtml}\"></{$tag}>"
-            : "<{$tag} {$attrs} splade-template-id=\"{$templateId}\" :splade-bridge=\"{$spladeBridgeHtml}\"></{$tag}>";
+            ? "<!--splade-template-id=\"{$templateId}\"-->{$genericComponent}"
+            : $genericComponent;
     }
 }

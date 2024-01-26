@@ -6,15 +6,29 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    slots: {
+        type: Array,
+        required: false,
+        default: () => ["default"],
+    },
 });
 
-const template = ref(`<${props.bridge.tag}></${props.bridge.tag}>`);
+const tag = props.bridge.tag;
+
+function generateTemplate() {
+    const slots = props.slots.map((slot) => {
+        return `<slot name="${slot}" />`;
+    });
+    return `<${tag}>${slots}</${tag}>`;
+}
+
+const template = ref(generateTemplate());
 const templateId = props.bridge["template_hash"];
 const eventBus = inject("$spladeTemplateBus");
 
 const updateTemplate = async function (data) {
     spladeTemplates[templateId] = data.template;
-    template.value = `<!--${data.hash}--><${props.bridge.tag}></${props.bridge.tag}>`;
+    template.value = `<!--${data.hash}-->` + generateTemplate();
 };
 
 eventBus.on(`template:${templateId}`, updateTemplate);
@@ -32,5 +46,9 @@ const render = computed(() => {
 </script>
 
 <template>
-    <render :splade-bridge="bridge" :splade-template-id="templateId"></render>
+    <render :splade-bridge="bridge" :splade-template-id="templateId">
+        <template v-for="slotName in slots">
+            <slot :name="slotName" />
+        </template>
+    </render>
 </template>

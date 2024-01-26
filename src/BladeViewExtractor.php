@@ -137,7 +137,7 @@ class BladeViewExtractor
             $defineVueProps->getOriginalScript(),
             $this->renderSpladeRenderFunction($defineVueProps),
             '</script>',
-            "<template><spladeRender {$propsBag->toHtml()} /></template>",
+            "<template><spladeRender {$propsBag->toHtml()}><template #default><slot /></template></spladeRender></template>",
         ]));
 
         $directory = config('splade-core.compiled_scripts');
@@ -359,6 +359,7 @@ class BladeViewExtractor
             ->when($this->needsSpladeBridge(), fn ($collection) => $collection->push('ref'))
             ->when($this->isRefreshable(), fn ($collection) => $collection->push('inject'))
             ->when($this->isComponent() && ! empty($this->getBladeProperties()), fn ($collection) => $collection->push('computed'))
+            ->push('useSlots')
             ->unique()
             ->sort()
             ->implode(',');
@@ -541,6 +542,8 @@ JS : '';
         $definePropsObject = $defineVueProps->getNewPropsObject();
 
         return <<<JS
+        const slots = useSlots();
+        console.log("{$this->getTag()}Render", slots);
 const spladeRender = {
     {$inheritAttrs}
     name: "{$this->getTag()}Render",

@@ -364,8 +364,7 @@ class BladeViewExtractor
             ->implode(',');
 
         $spladeCoreImports = match (true) {
-            $this->needsSpladeBridge() => 'BladeComponent, GenericSpladeComponent',
-            $this->isComponent() => 'GenericSpladeComponent',
+            $this->needsSpladeBridge() => 'BladeComponent',
             default => '',
         };
 
@@ -375,7 +374,7 @@ import { {$vueFunctionsImports} } from 'vue';
 JS;
         }
 
-        $dev = true;
+        $dev = false;
 
         return $dev ? <<<JS
 import { {$spladeCoreImports} } from '../../../../dist/protone-media-laravel-splade-core'
@@ -535,11 +534,9 @@ JS : '';
             }))
             ->implode(',');
 
-        $components = Collection::make([
-            'GenericSpladeComponent', ...$importedComponents['static'],
-        ])->implode(',');
+        $components = Collection::make($importedComponents['static'])->implode(',');
 
-        $componentsObject = $this->isComponent() ? <<<JS
+        $componentsObject = $this->isComponent() && $components ? <<<JS
 components: { {$components} },
 JS : '';
 

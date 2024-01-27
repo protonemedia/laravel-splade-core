@@ -1,5 +1,4 @@
 <script setup>
-import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
 import { markRaw, ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
 import { Dialog, DialogPanel, TransitionRoot, TransitionChild } from '@headlessui/vue'
@@ -11,7 +10,7 @@ function show() {
 }
 const spladeRender = {
     name: 'SpladeComponentDynamicComponentImportRender',
-    components: { GenericSpladeComponent, Dialog, DialogPanel },
+    components: { Dialog, DialogPanel },
     template: spladeTemplates[props.spladeTemplateId],
     data: () => {
         return { openend, show, TransitionRoot: markRaw(TransitionRoot), TransitionChild: markRaw(TransitionChild) }
@@ -19,4 +18,8 @@ const spladeRender = {
     props: { spladeBridge: Object, spladeTemplateId: String },
 }
 </script>
-<template><spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" /></template>
+<template>
+    <spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId"
+        ><template #default><slot /></template
+    ></spladeRender>
+</template>

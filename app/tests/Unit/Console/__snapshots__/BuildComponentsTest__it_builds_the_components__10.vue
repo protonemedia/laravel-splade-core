@@ -12,4 +12,8 @@ const spladeRender = {
     props: { spladeTemplateId: String },
 }
 </script>
-<template><spladeRender :splade-template-id="spladeTemplateId" /></template>
+<template>
+    <spladeRender :splade-template-id="spladeTemplateId"
+        ><template #default><slot /></template
+    ></spladeRender>
+</template>

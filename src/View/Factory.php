@@ -116,6 +116,8 @@ class Factory extends BaseFactory
             'view' => $view = $this->componentData[count($this->componentStack)]['componentName'] ?? '',
         ]);
 
+        $templateId = $this->componentData[count($this->componentStack) + 1]['spladeBridge']['template_hash'] ?? null;
+
         $data = parent::componentData();
 
         if (! array_key_exists('spladeBridge', $data)) {
@@ -125,7 +127,7 @@ class Factory extends BaseFactory
         $this->originalSlots[count($this->componentStack)] = [];
 
         $data['__laravel_slots'] = collect($data['__laravel_slots'] ?? [])
-            ->map(function (ComponentSlot $slot, $name) use ($view) {
+            ->map(function (ComponentSlot $slot, $name) use ($templateId, $view) {
                 if ($slot->isEmpty()) {
                     return $slot;
                 }
@@ -137,7 +139,12 @@ class Factory extends BaseFactory
                     'component' => $view,
                 ];
 
-                return new ComponentSlot('<slot name="'.$name.'"></slot>');
+                $slot = '<slot name="'.$name.'"></slot>';
+
+                return new ComponentSlot(
+                    static::$trackSpladeComponents
+                        ? "<!--splade-template-id=\"{$templateId}\"-->{$slot}"
+                        : $slot);
             })
             ->all();
 

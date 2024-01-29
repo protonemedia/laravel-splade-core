@@ -18,8 +18,6 @@ class RefreshableMiddlewareTest extends TestCase
     /** @test */
     public function it_gathers_the_template_and_its_children()
     {
-        return $this->markTestSkipped('Implementation flawed');
-
         $content = $this->get('/refresh')->getContent();
 
         // get all templates (spladeTemplates['175d8791545433da6cc09b2c24114bf3'])

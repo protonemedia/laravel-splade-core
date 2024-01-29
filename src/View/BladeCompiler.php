@@ -114,14 +114,14 @@ class BladeCompiler extends BaseBladeCompiler implements BladeMiddleware
         );
     }
 
-    protected function compileComponentTags($value)
+    /**
+     * Returns a fresh instance of the ComponentTagCompiler
+     * with references to this BladeCompiler.
+     */
+    public function makeComponentTagCompiler(): ComponentTagCompiler
     {
-        if (! $this->compilesComponentTags) {
-            return $value;
-        }
-
-        return (new ComponentTagCompiler(
+        return new ComponentTagCompiler(
             $this->classComponentAliases, $this->classComponentNamespaces, $this
-        ))->compile($value);
+        );
     }
 }

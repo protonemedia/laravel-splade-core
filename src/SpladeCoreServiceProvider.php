@@ -23,7 +23,6 @@ use ProtoneMedia\SpladeCore\Data\TransformerRepository;
 use ProtoneMedia\SpladeCore\Http\InvokeComponentController;
 use ProtoneMedia\SpladeCore\View\BladeCompiler;
 use ProtoneMedia\SpladeCore\View\CompilerEngine;
-use ProtoneMedia\SpladeCore\View\ComponentTagCompiler;
 use ProtoneMedia\SpladeCore\View\Factory;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -71,13 +70,7 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
     protected function registerComponentHelper()
     {
         $this->app->singleton(ComponentHelper::class, function () {
-            $bladeCompliler = $this->getBladeCompiler();
-
-            $componentTagCompiler = new ComponentTagCompiler(
-                $bladeCompliler->getClassComponentAliases(),
-                $bladeCompliler->getClassComponentNamespaces(),
-                $bladeCompliler
-            );
+            $componentTagCompiler = $this->getBladeCompiler()->makeComponentTagCompiler();
 
             return new ComponentHelper($componentTagCompiler, $this->app['files']);
         });

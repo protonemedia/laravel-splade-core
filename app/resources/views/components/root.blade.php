@@ -21,5 +21,6 @@
 
     <x-slot name="subslot">
         Hi again from Parent
+        <p>Count: @{{ count }}</p>
     </x-slot>
 </x-child>

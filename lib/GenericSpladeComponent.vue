@@ -47,7 +47,7 @@ const render = computed(() => {
 
 <template>
     <render :splade-bridge="bridge" :splade-template-id="templateId">
-        <template v-for="slotName in slots">
+        <template v-for="slotName in slots" :key="slotName" #[slotName]>
             <slot :name="slotName" />
         </template>
     </render>

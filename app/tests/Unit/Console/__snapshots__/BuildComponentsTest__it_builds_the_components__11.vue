@@ -13,7 +13,7 @@ const spladeRender = {
 }
 </script>
 <template>
-    <spladeRender :splade-template-id="spladeTemplateId"
-        ><template><slot /></template
-    ></spladeRender>
+    <spladeRender :splade-template-id="spladeTemplateId">
+        <template v-for="(_, slot) of $slots" #[slot]="scope"><slot :name="slot" v-bind="scope" /></template>
+    </spladeRender>
 </template>

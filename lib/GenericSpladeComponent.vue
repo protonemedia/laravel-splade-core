@@ -6,20 +6,12 @@ const props = defineProps({
         type: Object,
         required: true,
     },
-    slots: {
-        type: Array,
-        required: false,
-        default: () => ["default"],
-    },
 });
 
 const tag = props.bridge.tag;
 
 function generateTemplate() {
-    const slots = props.slots.map((slot) => {
-        return `<slot name="${slot}" />`;
-    });
-    return `<${tag}>${slots}</${tag}>`;
+    return `<${tag}><template v-for="(_, slot) of $slots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope" /></template></${tag}>`;
 }
 
 const template = ref(generateTemplate());
@@ -47,8 +39,8 @@ const render = computed(() => {
 
 <template>
     <render :splade-bridge="bridge" :splade-template-id="templateId">
-        <template v-for="slotName in slots" :key="slotName" #[slotName]>
-            <slot :name="slotName" />
-        </template>
+        <template v-for="(_, slot) of $slots" #[slot]="scope"
+            ><slot :name="slot" v-bind="scope"
+        /></template>
     </render>
 </template>

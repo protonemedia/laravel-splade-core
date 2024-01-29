@@ -125,15 +125,6 @@ class BladeViewExtractor
         $defineVueProps = $this->extractDefinePropsFromScript();
         $propsBag = $defineVueProps->toAttributeBag();
 
-        $slots = collect($this->data['__laravel_slots'] ?? [])
-            ->keys()
-            ->map(function (string $slot) {
-                $slot = $slot === '__default' ? 'default' : Str::kebab($slot);
-
-                return "<template #{$slot}><slot name=\"{$slot}\" /></template>";
-            })
-            ->implode(PHP_EOL) ?: '<template><slot /></template>';
-
         $vueComponent = implode(PHP_EOL, array_filter([
             '<script setup>',
             $this->renderImports(),
@@ -146,7 +137,9 @@ class BladeViewExtractor
             $defineVueProps->getOriginalScript(),
             $this->renderSpladeRenderFunction($defineVueProps),
             '</script>',
-            "<template><spladeRender {$propsBag->toHtml()}>{$slots}</spladeRender></template>",
+            "<template><spladeRender {$propsBag->toHtml()}>",
+            '<template v-for="(_, slot) of $slots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope"/></template>',
+            '</spladeRender></template>',
         ]));
 
         $directory = config('splade-core.compiled_scripts');

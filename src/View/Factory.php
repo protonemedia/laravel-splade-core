@@ -3,14 +3,12 @@
 namespace ProtoneMedia\SpladeCore\View;
 
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 use Illuminate\View\ComponentAttributeBag;
 use Illuminate\View\ComponentSlot;
 use Illuminate\View\Factory as BaseFactory;
-use Illuminate\View\View;
 use ProtoneMedia\SpladeCore\AddSpladeToComponentData;
 use ProtoneMedia\SpladeCore\ResolveOnce;
 
@@ -25,6 +23,11 @@ class Factory extends BaseFactory
      * The tracked Splade components.
      */
     protected static array $spladeComponents = [];
+
+    /**
+     * The original slots before they were replaced with a Vue slot.
+     */
+    protected array $originalSlots = [];
 
     /**
      * Enable tracking of Splade components.
@@ -108,15 +111,9 @@ class Factory extends BaseFactory
         );
     }
 
-    private $originalSlots = [];
-
     protected function componentData()
     {
-        Log::debug('Fetching slots for component', [
-            'view' => $view = $this->componentData[count($this->componentStack)]['componentName'] ?? '',
-        ]);
-
-        $templateId = $this->componentData[count($this->componentStack) + 1]['spladeBridge']['template_hash'] ?? null;
+        $this->originalSlots = [];
 
         $data = parent::componentData();
 
@@ -124,31 +121,35 @@ class Factory extends BaseFactory
             return $data;
         }
 
-        $this->originalSlots[count($this->componentStack)] = [];
+        $templateId = $this->componentData[count($this->componentStack) + 1]['spladeBridge']['template_hash'] ?? null;
 
         $data['__laravel_slots'] = collect($data['__laravel_slots'] ?? [])
-            ->map(function (ComponentSlot $slot, $name) use ($templateId, $view) {
+            ->map(function (ComponentSlot $slot, $name) use ($templateId) {
                 if ($slot->isEmpty()) {
                     return $slot;
                 }
 
                 $name = $name === '__default' ? 'default' : Str::kebab($name);
 
-                $this->originalSlots[count($this->componentStack)][$name] = [
-                    'slot' => $slot,
-                    'component' => $view,
-                ];
+                $this->originalSlots[$name] = $slot;
 
-                $slot = '<slot name="'.$name.'"></slot>';
+                $vueSlot = '<slot name="'.$name.'"></slot>';
 
                 return new ComponentSlot(
                     static::$trackSpladeComponents
-                        ? "<!--splade-template-id=\"{$templateId}\"-->{$slot}"
-                        : $slot);
+                        ? "<!--splade-template-id=\"{$templateId}\"-->{$vueSlot}"
+                        : $vueSlot
+                );
             })
             ->all();
 
-        $data['slot'] = $data['__laravel_slots']['__default'] ?? null;
+        foreach ($data['__laravel_slots'] as $name => $slot) {
+            if ($name === '__default') {
+                $name = 'slot';
+            }
+
+            $data[$name] = $slot;
+        }
 
         return $data;
     }
@@ -162,14 +163,6 @@ class Factory extends BaseFactory
      */
     public function renderComponent()
     {
-        $component = Arr::last($this->componentStack);
-
-        // if ($component instanceof View) {
-        //     Log::debug('Rendering component', [
-        //         'view' => $component->name(),
-        //     ]);
-        // }
-
         /** @var array */
         $componentData = $this->componentData[$this->currentComponent()];
 
@@ -185,22 +178,11 @@ class Factory extends BaseFactory
 
         $output = parent::renderComponent();
 
-        // if ($component instanceof View) {
-        //     Log::debug('Rendered component', [
-        //         'view' => $view = $component->name(),
-        //     ]);
-
-        //     if ($view === 'components.layout') {
-        //         // dd($output, $this);
-        //     }
+        // if ($componentData['componentName'] === 'child') {
+        //     dd($output, $this);
         // }
-        // $output = str_replace('###INSERT-SLOT###', $this->originalSlots[count($this->componentStack)]['default']->toHtml() ?? '', $output);
 
         if (! $spladeBridge) {
-            // if ($view === 'components.layout') {
-            //     // dd($output, $this);
-            // }
-
             return $output;
         }
 
@@ -244,20 +226,13 @@ class Factory extends BaseFactory
 
         $this->pushSpladeTemplate($templateId, $output);
 
-        $slots = $this->originalSlots[count($this->componentStack)] ?? [];
+        $slotsHtml = collect($this->originalSlots)->map(function ($slot, $name) {
+            $name = $name === '__default' ? 'default' : Str::kebab($name);
 
-        $slotsHtml = collect($slots)->map(function ($slot, $name) {
-            return "<template #{$name}>{$slot['slot']->toHtml()}</template>";
+            return "<template #{$name}>{$slot->toHtml()}</template>";
         })->implode("\n");
 
-        $slotKeys = collect($slots)
-            ->keys()
-            ->map(function ($name) {
-                return "'{$name}'";
-            })
-            ->implode(', ');
-
-        $genericComponent = "<generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\" :slots=\"[{$slotKeys}]\">
+        $genericComponent = "<generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\">
             {$slotsHtml}
         </generic-splade-component>";
 

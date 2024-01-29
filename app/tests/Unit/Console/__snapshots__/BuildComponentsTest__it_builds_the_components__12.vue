@@ -78,6 +78,6 @@ const spladeRender = {
         :renamed="renamed"
         :js-object="jsObject"
         :data-from-method="dataFromMethod"
-        ><template #default><slot /></template
+        ><template><slot /></template
     ></spladeRender>
 </template>

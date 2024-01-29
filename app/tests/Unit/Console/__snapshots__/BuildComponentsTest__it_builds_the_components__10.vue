@@ -14,6 +14,6 @@ const spladeRender = {
 </script>
 <template>
     <spladeRender :splade-template-id="spladeTemplateId"
-        ><template #default><slot /></template
+        ><template><slot /></template
     ></spladeRender>
 </template>

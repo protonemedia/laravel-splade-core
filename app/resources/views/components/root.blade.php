@@ -15,6 +15,11 @@
 <button @click="increment">Increment</button>
 
 <x-child>
-    Child Slot
+    Child Slot from Parent Component (inside <-x-child>)
+    Hi {{ 'nerd' }}
     <p>Count: @{{ count }}</p>
+
+    <x-slot name="subslot">
+        Hi again from Parent
+    </x-slot>
 </x-child>

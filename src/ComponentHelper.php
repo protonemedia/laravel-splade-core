@@ -6,9 +6,9 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use Illuminate\View\AnonymousComponent;
-use Illuminate\View\Compilers\ComponentTagCompiler;
 use Illuminate\View\Component;
 use Illuminate\View\View;
+use ProtoneMedia\SpladeCore\View\ComponentTagCompiler;
 
 class ComponentHelper
 {

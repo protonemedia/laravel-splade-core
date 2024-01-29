@@ -4,6 +4,7 @@ namespace ProtoneMedia\SpladeCore\View;
 
 use Illuminate\Support\Collection;
 use Illuminate\View\Compilers\BladeCompiler as BaseBladeCompiler;
+use Illuminate\View\Compilers\ComponentTagCompiler;
 use ProtoneMedia\SpladeCore\BladeMiddleware;
 use ProtoneMedia\SpladeCore\BladeViewExtractorMiddleware;
 

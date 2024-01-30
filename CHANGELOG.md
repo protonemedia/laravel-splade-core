@@ -2,6 +2,17 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 4.0.0 - 2024-01-30
+
+### What's Changed
+
+* Support for passing Blade Slots as Vue slots by @pascalbaljet in https://github.com/protonemedia/laravel-splade-core/pull/27
+* Bump actions/cache from 3 to 4 by @dependabot in https://github.com/protonemedia/laravel-splade-core/pull/26
+
+**Full Changelog**: https://github.com/protonemedia/laravel-splade-core/compare/3.2.0...4.0.0
+
+*Note: don't forget to update the NPM package to v4.0 as well.*
+
 ## 3.2.0 - 2024-01-20
 
 ### What's Changed
@@ -73,6 +84,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 
 

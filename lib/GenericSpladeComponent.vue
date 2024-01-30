@@ -8,19 +8,15 @@ const props = defineProps({
     },
 });
 
-const tag = props.bridge.tag;
+const initialTemplate = `<${props.bridge.tag}><template v-for="(_, slot) of $slots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope" /></template></${props.bridge.tag}>`;
 
-function generateTemplate() {
-    return `<${tag}><template v-for="(_, slot) of $slots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope" /></template></${tag}>`;
-}
-
-const template = ref(generateTemplate());
+const template = ref(initialTemplate);
 const templateId = props.bridge["template_hash"];
 const eventBus = inject("$spladeTemplateBus");
 
 const updateTemplate = async function (data) {
     spladeTemplates[templateId] = data.template;
-    template.value = `<!--${data.hash}-->` + generateTemplate();
+    template.value = `<!--${data.hash}-->${initialTemplate}`;
 };
 
 eventBus.on(`template:${templateId}`, updateTemplate);

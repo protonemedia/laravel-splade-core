@@ -365,9 +365,9 @@ class BladeViewExtractor
             ->sort()
             ->implode(',');
 
-        return <<<JS
+        return $vueFunctionsImports ? <<<JS
 import { {$vueFunctionsImports} } from 'vue';
-JS;
+JS : '';
     }
 
     /**

@@ -1,5 +1,4 @@
 <script setup>
-import {} from 'vue'
 const props = defineProps({
     spladeBridge: Object,
     spladeTemplateId: String,

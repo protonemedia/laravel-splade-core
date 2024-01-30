@@ -34,6 +34,13 @@ class BuildComponentsTest extends TestCase
             'ComponentToVueProp',
             'ComponentComponentImport',
             'ComponentDynamicComponentImport',
+            'ComponentChild',
+            'ComponentEmit',
+            'ComponentPropsInTemplate',
+            'ComponentRoot',
+            'Emit',
+            'PropsInTemplate',
+            'Slot',
         ] as $component) {
             $this->assertFileExists(resource_path('js/splade/Splade'.$component.'.vue'));
             $this->assertMatchesVueSnapshot($filesytem->get(resource_path('js/splade/Splade'.$component.'.vue')));

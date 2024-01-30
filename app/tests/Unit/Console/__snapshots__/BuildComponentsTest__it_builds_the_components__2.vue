@@ -14,12 +14,9 @@ const executeWithCallback = () => {
 }
 const spladeRender = {
     name: 'SpladeComponentBladeMethodRender',
-
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { executeWithCallback, response, execute, sleep }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ executeWithCallback, response, execute, sleep }),
 }
 </script>
 <template>

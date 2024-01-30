@@ -18,12 +18,9 @@ onMounted(() => {
 })
 const spladeRender = {
     name: 'SpladeComponentDatePickerRender',
-
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { emit, setSpladeRef }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String, modelValue: {} },
+    data: () => ({ emit, setSpladeRef }),
 }
 </script>
 <template>

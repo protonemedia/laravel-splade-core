@@ -531,11 +531,11 @@ JS : '';
         return <<<JS
 const spladeRender = {
     {$inheritAttrs}
-    name: "{$this->getTag()}Render",
     {$componentsObject}
+    name: "{$this->getTag()}Render",
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => { return { {$dataObject} } },
     props: {$definePropsObject},
+    data: () => ({{$dataObject}}),
 };
 JS;
     }

@@ -20,12 +20,9 @@ fail.catch((data) => {
 })
 const spladeRender = {
     name: 'SpladeComponentBladeMethodCallbacksRender',
-
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { response, execute, fail }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ response, execute, fail }),
 }
 </script>
 <template>

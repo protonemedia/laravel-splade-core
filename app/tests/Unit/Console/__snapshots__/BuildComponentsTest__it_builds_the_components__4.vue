@@ -14,12 +14,9 @@ const message = computed({
 })
 const spladeRender = {
     name: 'SpladeComponentChangeBladePropRender',
-
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { message, setMessage }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ message, setMessage }),
 }
 </script>
 <template>

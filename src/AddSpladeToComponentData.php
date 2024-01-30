@@ -2,7 +2,6 @@
 
 namespace ProtoneMedia\SpladeCore;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\AnonymousComponent;
 use Illuminate\View\Component;
 use Illuminate\View\View;
@@ -43,10 +42,5 @@ class AddSpladeToComponentData
         if ($view instanceof View) {
             $view->with($key, $data[$key]);
         }
-
-        Log::debug('Splade bridge added to component', [
-            'component' => get_class($component),
-            'path' => $path,
-        ]);
     }
 }

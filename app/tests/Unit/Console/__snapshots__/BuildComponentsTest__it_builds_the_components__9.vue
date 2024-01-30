@@ -5,12 +5,9 @@ const message = ref('Hello Vue!')
 const uppercase = computed(() => message.value.toUpperCase())
 const spladeRender = {
     name: 'SpladeComponentTwoWayBindingRender',
-
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { message, uppercase }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ message, uppercase }),
 }
 </script>
 <template>

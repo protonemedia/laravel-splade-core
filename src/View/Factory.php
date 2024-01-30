@@ -73,8 +73,6 @@ class Factory extends BaseFactory
             // prevent leaking the full path
             $path = Str::after($trace[0]['file'], base_path());
 
-            $name = Str::camel($component->componentName);
-
             $hash = md5($path.'.'.$trace[0]['line'].json_encode($data));
 
             (new AddSpladeToComponentData)($component, $data, $hash, $view);
@@ -111,6 +109,10 @@ class Factory extends BaseFactory
         );
     }
 
+    /**
+     * Replaces the Blade component slots with Vue slots and preserves the original slots
+     * so they can be injected in the generic Splade component (in renderComponent()).
+     */
     protected function componentData()
     {
         $this->originalSlots = [];
@@ -177,10 +179,6 @@ class Factory extends BaseFactory
         }
 
         $output = parent::renderComponent();
-
-        // if ($componentData['componentName'] === 'child') {
-        //     dd($output, $this);
-        // }
 
         if (! $spladeBridge) {
             return $output;

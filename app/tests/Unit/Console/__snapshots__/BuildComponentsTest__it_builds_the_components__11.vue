@@ -4,12 +4,9 @@ const props = defineProps({ spladeTemplateId: String })
 const message = ref('Hello World!')
 const spladeRender = {
     name: 'SpladeRegularViewRender',
-
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { message }
-    },
     props: { spladeTemplateId: String },
+    data: () => ({ message }),
 }
 </script>
 <template>

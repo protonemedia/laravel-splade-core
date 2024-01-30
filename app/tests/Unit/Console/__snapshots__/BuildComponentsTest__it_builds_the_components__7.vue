@@ -7,13 +7,11 @@ const _spladeTemplateBus = inject('$spladeTemplateBus')
 const refreshComponent = _spladeBladeHelpers.asyncRefreshComponent(_spladeBridgeState, _spladeTemplateBus)
 const spladeRender = {
     inheritAttrs: false,
-    name: 'SpladeComponentTimeRender',
 
+    name: 'SpladeComponentTimeRender',
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { refreshComponent }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ refreshComponent }),
 }
 </script>
 <template>

@@ -5,12 +5,9 @@ const message = ref('Hello Vue!')
 const reversed = computed(() => message.value.split('').reverse().join(''))
 const spladeRender = {
     name: 'SpladeComponentAnonymousRender',
-
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { message, reversed }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ message, reversed }),
 }
 </script>
 <template>

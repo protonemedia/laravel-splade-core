@@ -8,12 +8,9 @@ const form = ref({
 })
 const spladeRender = {
     name: 'SpladeComponentFormRender',
-
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { form }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ form }),
 }
 </script>
 <template>

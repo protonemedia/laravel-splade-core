@@ -9,13 +9,11 @@ function show() {
     openend.value = true
 }
 const spladeRender = {
-    name: 'SpladeComponentDynamicComponentImportRender',
     components: { Dialog, DialogPanel },
+    name: 'SpladeComponentDynamicComponentImportRender',
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { openend, show, TransitionRoot: markRaw(TransitionRoot), TransitionChild: markRaw(TransitionChild) }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ openend, show, TransitionRoot: markRaw(TransitionRoot), TransitionChild: markRaw(TransitionChild) }),
 }
 </script>
 <template>

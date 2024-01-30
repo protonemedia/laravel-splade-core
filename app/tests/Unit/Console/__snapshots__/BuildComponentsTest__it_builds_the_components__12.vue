@@ -25,11 +25,7 @@ const props = defineProps({
 })
 const spladeRender = {
     name: 'SpladeComponentToVuePropRender',
-
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return {}
-    },
     props: {
         spladeBridge: Object,
         spladeTemplateId: String,
@@ -53,6 +49,7 @@ const spladeRender = {
         jsObject: {},
         dataFromMethod: { type: Array },
     },
+    data: () => ({}),
 }
 </script>
 <template>

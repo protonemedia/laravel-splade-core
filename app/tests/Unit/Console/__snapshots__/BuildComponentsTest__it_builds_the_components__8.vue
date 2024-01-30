@@ -20,12 +20,9 @@ refreshComponent.finally(() => {
 })
 const spladeRender = {
     name: 'SpladeComponentTimeStateRender',
-
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { status, refreshComponent }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ status, refreshComponent }),
 }
 </script>
 <template>

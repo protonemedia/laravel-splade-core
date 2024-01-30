@@ -1,16 +1,18 @@
 <script setup>
-    const childVar = ref('Hello from child component');
+    const childVar = ref("What's that, Hawaiian Noises?");
 </script>
 
 <h2>Child component</h2>
+
 <div>
-    --DEFAULT SLOT--
-    Hi from {{ 'child' }}
-    <h3>Slot <span v-html="childVar" /></h3>
-    {{ $slot }}
-    --SUBSLOT--
-    What's that, Hawaiian Noises?
-    {{ $subslot ?? null }}
-    --SUBSLOT END--
-    Alright
+    <h3 v-html="childVar" />
+    <div dusk="slot">
+        {{ $slot }}
+        <p v-html="childVar" />
+    </div>
+
+    <div dusk="subslot">
+        {{ $subslot }}
+        <p v-html="childVar" />
+    </div>
 </div>

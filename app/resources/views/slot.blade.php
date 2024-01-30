@@ -3,7 +3,7 @@
         const layoutCounter = ref(0)
     </script>
 
-    <p>Layout counter: @{{ layoutCounter }}</p>
+    <p>Layout Counter: @{{ layoutCounter }}</p>
 
     <x-root @incremented="layoutCounter++" />
 </x-layout>

@@ -1,26 +1,23 @@
 <script setup>
-    const count = ref(0)
+    const rootCounter = ref(0)
 
     const emit = defineEmits(['incremented'])
 
     function increment() {
-        count.value++
+        rootCounter.value++
         emit('incremented')
     }
 </script>
 
 <h2>Parent component</h2>
-<p>Count: @{{ count }}</p>
+<p>Root Counter: @{{ rootCounter }}</p>
 
 <button @click="increment">Increment</button>
 
 <x-child>
-    Child Slot from Parent Component (inside <-x-child>)
-    Hi {{ 'nerd' }}
-    <p>Count: @{{ count }}</p>
+    <p>Root Counter from default slot: @{{ rootCounter }}</p>
 
     <x-slot name="subslot">
-        Hi again from Parent
-        <p>Count: @{{ count }}</p>
+        <p>Root Counter from sub-slot: @{{ rootCounter }}</p>
     </x-slot>
 </x-child>

@@ -1,10 +1,10 @@
 <script setup>
-import { BladeComponent } from '@protonemedia/laravel-splade-core'
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
+const _spladeBladeHelpers = inject('$spladeBladeHelpers')
 const _spladeBridgeState = ref(props.spladeBridge)
-const execute = BladeComponent.asyncComponentMethod('execute', _spladeBridgeState)
-const sleep = BladeComponent.asyncComponentMethod('sleep', _spladeBridgeState)
+const execute = _spladeBladeHelpers.asyncComponentMethod('execute', _spladeBridgeState)
+const sleep = _spladeBladeHelpers.asyncComponentMethod('sleep', _spladeBridgeState)
 const response = ref('-')
 
 const executeWithCallback = () => {

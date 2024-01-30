@@ -129,7 +129,7 @@ class BladeViewExtractor
             '<script setup>',
             $this->renderImports(),
             $defineVueProps->generatePropsDeclaration(),
-            $this->renderSpladeBridgeState(),
+            $this->renderSpladeBridge(),
             $this->renderBladeFunctionsAsJavascriptFunctions(),
             $this->renderBladePropertiesAsComputedVueProperties(),
             $this->renderJavascriptFunctionToRefreshComponent(),
@@ -358,31 +358,14 @@ class BladeViewExtractor
     {
         $vueFunctionsImports = $this->scriptParser->getVueFunctions()
             ->when($this->getImportedComponents()['dynamic']->isNotEmpty(), fn ($collection) => $collection->push('markRaw'))
-            ->when($this->needsSpladeBridge(), fn ($collection) => $collection->push('ref'))
+            ->when($this->needsSpladeBridge(), fn ($collection) => $collection->push('inject')->push('ref'))
             ->when($this->isRefreshable(), fn ($collection) => $collection->push('inject'))
             ->when($this->isComponent() && ! empty($this->getBladeProperties()), fn ($collection) => $collection->push('computed'))
             ->unique()
             ->sort()
             ->implode(',');
 
-        $spladeCoreImports = match (true) {
-            $this->needsSpladeBridge() => 'BladeComponent',
-            default => '',
-        };
-
-        if (! $spladeCoreImports) {
-            return <<<JS
-import { {$vueFunctionsImports} } from 'vue';
-JS;
-        }
-
-        $dev = false;
-
-        return $dev ? <<<JS
-import { {$spladeCoreImports} } from '../../../../dist/protone-media-laravel-splade-core'
-import { {$vueFunctionsImports} } from 'vue';
-JS : <<<JS
-import { {$spladeCoreImports} } from '@protonemedia/laravel-splade-core'
+        return <<<JS
 import { {$vueFunctionsImports} } from 'vue';
 JS;
     }
@@ -390,13 +373,14 @@ JS;
     /**
      * Renders the state for the SpladeBridge.
      */
-    protected function renderSpladeBridgeState(): string
+    protected function renderSpladeBridge(): string
     {
         if (! $this->needsSpladeBridge()) {
             return '';
         }
 
         return <<<'JS'
+const _spladeBladeHelpers = inject("$spladeBladeHelpers");
 const _spladeBridgeState = ref(props.spladeBridge);
 JS;
     }
@@ -410,7 +394,7 @@ JS;
 
         foreach ($this->getBladeFunctions() as $function) {
             $lines[] = <<<JS
-const {$function} = BladeComponent.asyncComponentMethod('{$function}', _spladeBridgeState);
+const {$function} = _spladeBladeHelpers.asyncComponentMethod('{$function}', _spladeBridgeState);
 JS;
         }
 
@@ -455,7 +439,7 @@ JS;
 
         return <<<'JS'
 const _spladeTemplateBus = inject("$spladeTemplateBus");
-const refreshComponent = BladeComponent.asyncRefreshComponent(_spladeBridgeState, _spladeTemplateBus);
+const refreshComponent = _spladeBladeHelpers.asyncRefreshComponent(_spladeBridgeState, _spladeTemplateBus);
 JS;
     }
 

@@ -1,19 +1,15 @@
 <script setup>
-import { markRaw, ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
-import { Dialog, DialogPanel, TransitionRoot, TransitionChild } from '@headlessui/vue'
+const emit = defineEmits(['trigger'])
 
-const openend = ref(false)
-
-function show() {
-    openend.value = true
+const trigger = () => {
+    emit('trigger')
 }
 const spladeRender = {
-    components: { Dialog, DialogPanel },
-    name: 'SpladeComponentDynamicComponentImportRender',
+    name: 'SpladeComponentEmitRender',
     template: spladeTemplates[props.spladeTemplateId],
     props: { spladeBridge: Object, spladeTemplateId: String },
-    data: () => ({ openend, show, TransitionRoot: markRaw(TransitionRoot), TransitionChild: markRaw(TransitionChild) }),
+    data: () => ({ emit, trigger }),
 }
 </script>
 <template>

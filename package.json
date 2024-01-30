@@ -1,6 +1,6 @@
 {
   "name": "@protonemedia/laravel-splade-core",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Splade Core: Use <script setup> and all of Vue 3's magic in your Laravel Blade.",
   "private": false,
   "author": "Pascal Baljet <pascal@protone.media>",
@@ -27,7 +27,7 @@
   },
   "peerDependencies": {
     "axios": "^1.1.2",
-    "vue": "^3.3.4"
+    "vue": "^3.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.3.4",

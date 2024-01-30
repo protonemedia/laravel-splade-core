@@ -7,6 +7,7 @@ use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
 use Illuminate\View\ComponentAttributeBag;
+use Illuminate\View\ComponentSlot;
 use Illuminate\View\Factory as BaseFactory;
 use ProtoneMedia\SpladeCore\AddSpladeToComponentData;
 use ProtoneMedia\SpladeCore\ResolveOnce;
@@ -22,6 +23,11 @@ class Factory extends BaseFactory
      * The tracked Splade components.
      */
     protected static array $spladeComponents = [];
+
+    /**
+     * The original slots before they were replaced with a Vue slot.
+     */
+    protected array $originalSlots = [];
 
     /**
      * Enable tracking of Splade components.
@@ -104,6 +110,53 @@ class Factory extends BaseFactory
     }
 
     /**
+     * Replaces the Blade component slots with Vue slots and preserves the original slots
+     * so they can be injected in the generic Splade component (in renderComponent()).
+     */
+    protected function componentData()
+    {
+        $this->originalSlots = [];
+
+        $data = parent::componentData();
+
+        if (! array_key_exists('spladeBridge', $data)) {
+            return $data;
+        }
+
+        $templateId = $this->componentData[count($this->componentStack) + 1]['spladeBridge']['template_hash'] ?? null;
+
+        $data['__laravel_slots'] = collect($data['__laravel_slots'] ?? [])
+            ->map(function (ComponentSlot $slot, $name) use ($templateId) {
+                if ($slot->isEmpty()) {
+                    return $slot;
+                }
+
+                $name = $name === '__default' ? 'default' : Str::kebab($name);
+
+                $this->originalSlots[$name] = $slot;
+
+                $vueSlot = '<slot name="'.$name.'"></slot>';
+
+                return new ComponentSlot(
+                    static::$trackSpladeComponents
+                        ? "<!--splade-template-id=\"{$templateId}\"-->{$vueSlot}"
+                        : $vueSlot
+                );
+            })
+            ->all();
+
+        foreach ($data['__laravel_slots'] as $name => $slot) {
+            if ($name === '__default') {
+                $name = 'slot';
+            }
+
+            $data[$name] = $slot;
+        }
+
+        return $data;
+    }
+
+    /**
      * Temporarily store the passed attributes, render the component and
      * push it to the Splade templates stack. Then return a generic Vue
      * component that will grab the template from the stack.
@@ -115,26 +168,27 @@ class Factory extends BaseFactory
         /** @var array */
         $componentData = $this->componentData[$this->currentComponent()];
 
-        if (! array_key_exists('spladeBridge', $componentData)) {
-            return parent::renderComponent();
+        /** @var array|null */
+        $spladeBridge = $componentData['spladeBridge'] ?? null;
+
+        if ($spladeBridge) {
+            /** @var ComponentAttributeBag */
+            $attributes = $componentData['attributes'];
+
+            $this->componentData[$this->currentComponent()]['attributes'] = new ComponentAttributeBag;
         }
-
-        /** @var ComponentAttributeBag */
-        $attributes = $componentData['attributes'];
-
-        $this->componentData[$this->currentComponent()]['attributes'] = new ComponentAttributeBag;
 
         $output = parent::renderComponent();
 
-        $spladeBridge = $componentData['spladeBridge'];
+        if (! $spladeBridge) {
+            return $output;
+        }
 
         $templateId = $spladeBridge['template_hash'];
 
         if (static::$trackSpladeComponents) {
             static::$spladeComponents[$templateId] = $output;
         }
-
-        $this->pushSpladeTemplate($templateId, $output);
 
         foreach (['data', 'props', 'functions'] as $key) {
             if ($spladeBridge[$key] instanceof ResolveOnce) {
@@ -168,8 +222,20 @@ class Factory extends BaseFactory
 
         $attrs = $attributes->toHtml();
 
+        $this->pushSpladeTemplate($templateId, $output);
+
+        $slotsHtml = collect($this->originalSlots)->map(function ($slot, $name) {
+            $name = $name === '__default' ? 'default' : Str::kebab($name);
+
+            return "<template #{$name}>{$slot->toHtml()}</template>";
+        })->implode("\n");
+
+        $genericComponent = "<generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\">
+            {$slotsHtml}
+        </generic-splade-component>";
+
         return static::$trackSpladeComponents
-            ? "<!--splade-template-id=\"{$templateId}\"--><generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\"></generic-splade-component>"
-            : "<generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\"></generic-splade-component>";
+            ? "<!--splade-template-id=\"{$templateId}\"-->{$genericComponent}"
+            : $genericComponent;
     }
 }

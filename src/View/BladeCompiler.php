@@ -4,6 +4,7 @@ namespace ProtoneMedia\SpladeCore\View;
 
 use Illuminate\Support\Collection;
 use Illuminate\View\Compilers\BladeCompiler as BaseBladeCompiler;
+use Illuminate\View\Compilers\ComponentTagCompiler;
 use ProtoneMedia\SpladeCore\BladeMiddleware;
 use ProtoneMedia\SpladeCore\BladeViewExtractorMiddleware;
 
@@ -111,6 +112,17 @@ class BladeCompiler extends BaseBladeCompiler implements BladeMiddleware
             'startComponent($component->resolveView(), $component->data())',
             'startComponent($component->resolveView(), $component->data(), $component)',
             parent::compileClassComponentOpening($component, $alias, $data, $hash)
+        );
+    }
+
+    /**
+     * Returns a fresh instance of the ComponentTagCompiler
+     * with references to this BladeCompiler.
+     */
+    public function makeComponentTagCompiler(): ComponentTagCompiler
+    {
+        return new ComponentTagCompiler(
+            $this->classComponentAliases, $this->classComponentNamespaces, $this
         );
     }
 }

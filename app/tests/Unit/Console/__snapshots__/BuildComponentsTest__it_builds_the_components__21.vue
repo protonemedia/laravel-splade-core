@@ -1,12 +1,12 @@
 <script setup>
 import { ref } from 'vue'
 const props = defineProps({ spladeTemplateId: String })
-const message = ref('Hello Included view!')
+const layoutCounter = ref(0)
 const spladeRender = {
-    name: 'SpladeIncludedViewRender',
+    name: 'SpladeSlotRender',
     template: spladeTemplates[props.spladeTemplateId],
     props: { spladeTemplateId: String },
-    data: () => ({ message }),
+    data: () => ({ layoutCounter }),
 }
 </script>
 <template>

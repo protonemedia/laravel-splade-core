@@ -1,9 +1,9 @@
 <script setup>
-import { BladeComponent, GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
-import { computed, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
+const _spladeBladeHelpers = inject('$spladeBladeHelpers')
 const _spladeBridgeState = ref(props.spladeBridge)
-const setMessage = BladeComponent.asyncComponentMethod('setMessage', _spladeBridgeState)
+const setMessage = _spladeBladeHelpers.asyncComponentMethod('setMessage', _spladeBridgeState)
 const message = computed({
     get() {
         return _spladeBridgeState.value.data.message
@@ -14,12 +14,13 @@ const message = computed({
 })
 const spladeRender = {
     name: 'SpladeComponentChangeBladePropRender',
-    components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { message, setMessage }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ message, setMessage }),
 }
 </script>
-<template><spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" /></template>
+<template>
+    <spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId">
+        <template v-for="(_, slot) of $slots" #[slot]="scope"><slot :name="slot" v-bind="scope" /></template>
+    </spladeRender>
+</template>

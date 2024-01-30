@@ -1,19 +1,19 @@
 <script setup>
-import { markRaw, ref } from 'vue'
+import { ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
-import { Dialog, DialogPanel, TransitionRoot, TransitionChild } from '@headlessui/vue'
+const rootCounter = ref(0)
 
-const openend = ref(false)
+const emit = defineEmits(['incremented'])
 
-function show() {
-    openend.value = true
+function increment() {
+    rootCounter.value++
+    emit('incremented')
 }
 const spladeRender = {
-    components: { Dialog, DialogPanel },
-    name: 'SpladeComponentDynamicComponentImportRender',
+    name: 'SpladeComponentRootRender',
     template: spladeTemplates[props.spladeTemplateId],
     props: { spladeBridge: Object, spladeTemplateId: String },
-    data: () => ({ openend, show, TransitionRoot: markRaw(TransitionRoot), TransitionChild: markRaw(TransitionChild) }),
+    data: () => ({ emit, increment, rootCounter }),
 }
 </script>
 <template>

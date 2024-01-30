@@ -1,10 +1,10 @@
 <script setup>
-import { BladeComponent, GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String })
+const _spladeBladeHelpers = inject('$spladeBladeHelpers')
 const _spladeBridgeState = ref(props.spladeBridge)
-const execute = BladeComponent.asyncComponentMethod('execute', _spladeBridgeState)
-const fail = BladeComponent.asyncComponentMethod('fail', _spladeBridgeState)
+const execute = _spladeBladeHelpers.asyncComponentMethod('execute', _spladeBridgeState)
+const fail = _spladeBladeHelpers.asyncComponentMethod('fail', _spladeBridgeState)
 const response = ref('-')
 
 execute.before((data) => {
@@ -20,12 +20,13 @@ fail.catch((data) => {
 })
 const spladeRender = {
     name: 'SpladeComponentBladeMethodCallbacksRender',
-    components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { response, execute, fail }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String },
+    data: () => ({ response, execute, fail }),
 }
 </script>
-<template><spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" /></template>
+<template>
+    <spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId">
+        <template v-for="(_, slot) of $slots" #[slot]="scope"><slot :name="slot" v-bind="scope" /></template>
+    </spladeRender>
+</template>

@@ -1,6 +1,4 @@
 <script setup>
-import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
-import {} from 'vue'
 const props = defineProps({
     spladeBridge: Object,
     spladeTemplateId: String,
@@ -26,11 +24,7 @@ const props = defineProps({
 })
 const spladeRender = {
     name: 'SpladeComponentToVuePropRender',
-    components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return {}
-    },
     props: {
         spladeBridge: Object,
         spladeTemplateId: String,
@@ -54,6 +48,7 @@ const spladeRender = {
         jsObject: {},
         dataFromMethod: { type: Array },
     },
+    data: () => ({}),
 }
 </script>
 <template>
@@ -79,5 +74,7 @@ const spladeRender = {
         :renamed="renamed"
         :js-object="jsObject"
         :data-from-method="dataFromMethod"
-    />
+    >
+        <template v-for="(_, slot) of $slots" #[slot]="scope"><slot :name="slot" v-bind="scope" /></template>
+    </spladeRender>
 </template>

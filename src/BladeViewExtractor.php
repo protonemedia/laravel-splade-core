@@ -129,7 +129,7 @@ class BladeViewExtractor
             '<script setup>',
             $this->renderImports(),
             $defineVueProps->generatePropsDeclaration(),
-            $this->renderSpladeBridgeState(),
+            $this->renderSpladeBridge(),
             $this->renderBladeFunctionsAsJavascriptFunctions(),
             $this->renderBladePropertiesAsComputedVueProperties(),
             $this->renderJavascriptFunctionToRefreshComponent(),
@@ -137,7 +137,9 @@ class BladeViewExtractor
             $defineVueProps->getOriginalScript(),
             $this->renderSpladeRenderFunction($defineVueProps),
             '</script>',
-            "<template><spladeRender {$propsBag->toHtml()} /></template>",
+            "<template><spladeRender {$propsBag->toHtml()}>",
+            '<template v-for="(_, slot) of $slots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope"/></template>',
+            '</spladeRender></template>',
         ]));
 
         $directory = config('splade-core.compiled_scripts');
@@ -356,41 +358,29 @@ class BladeViewExtractor
     {
         $vueFunctionsImports = $this->scriptParser->getVueFunctions()
             ->when($this->getImportedComponents()['dynamic']->isNotEmpty(), fn ($collection) => $collection->push('markRaw'))
-            ->when($this->needsSpladeBridge(), fn ($collection) => $collection->push('ref'))
+            ->when($this->needsSpladeBridge(), fn ($collection) => $collection->push('inject')->push('ref'))
             ->when($this->isRefreshable(), fn ($collection) => $collection->push('inject'))
             ->when($this->isComponent() && ! empty($this->getBladeProperties()), fn ($collection) => $collection->push('computed'))
             ->unique()
             ->sort()
             ->implode(',');
 
-        $spladeCoreImports = match (true) {
-            $this->needsSpladeBridge() => 'BladeComponent, GenericSpladeComponent',
-            $this->isComponent() => 'GenericSpladeComponent',
-            default => '',
-        };
-
-        if (! $spladeCoreImports) {
-            return <<<JS
+        return $vueFunctionsImports ? <<<JS
 import { {$vueFunctionsImports} } from 'vue';
-JS;
-        }
-
-        return <<<JS
-import { {$spladeCoreImports} } from '@protonemedia/laravel-splade-core'
-import { {$vueFunctionsImports} } from 'vue';
-JS;
+JS : '';
     }
 
     /**
      * Renders the state for the SpladeBridge.
      */
-    protected function renderSpladeBridgeState(): string
+    protected function renderSpladeBridge(): string
     {
         if (! $this->needsSpladeBridge()) {
             return '';
         }
 
         return <<<'JS'
+const _spladeBladeHelpers = inject("$spladeBladeHelpers");
 const _spladeBridgeState = ref(props.spladeBridge);
 JS;
     }
@@ -404,7 +394,7 @@ JS;
 
         foreach ($this->getBladeFunctions() as $function) {
             $lines[] = <<<JS
-const {$function} = BladeComponent.asyncComponentMethod('{$function}', _spladeBridgeState);
+const {$function} = _spladeBladeHelpers.asyncComponentMethod('{$function}', _spladeBridgeState);
 JS;
         }
 
@@ -449,7 +439,7 @@ JS;
 
         return <<<'JS'
 const _spladeTemplateBus = inject("$spladeTemplateBus");
-const refreshComponent = BladeComponent.asyncRefreshComponent(_spladeBridgeState, _spladeTemplateBus);
+const refreshComponent = _spladeBladeHelpers.asyncRefreshComponent(_spladeBridgeState, _spladeTemplateBus);
 JS;
     }
 
@@ -530,11 +520,9 @@ JS : '';
             }))
             ->implode(',');
 
-        $components = Collection::make([
-            'GenericSpladeComponent', ...$importedComponents['static'],
-        ])->implode(',');
+        $components = Collection::make($importedComponents['static'])->implode(',');
 
-        $componentsObject = $this->isComponent() ? <<<JS
+        $componentsObject = $this->isComponent() && $components ? <<<JS
 components: { {$components} },
 JS : '';
 
@@ -543,11 +531,11 @@ JS : '';
         return <<<JS
 const spladeRender = {
     {$inheritAttrs}
-    name: "{$this->getTag()}Render",
     {$componentsObject}
+    name: "{$this->getTag()}Render",
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => { return { {$dataObject} } },
     props: {$definePropsObject},
+    data: () => ({{$dataObject}}),
 };
 JS;
     }

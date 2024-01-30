@@ -1,12 +1,16 @@
 <script setup>
 import { ref } from 'vue'
 const props = defineProps({ spladeTemplateId: String })
-const message = ref('Hello Included view!')
+const title = ref('Default title')
+
+function updateTitle() {
+    title.value = 'New title'
+}
 const spladeRender = {
-    name: 'SpladeIncludedViewRender',
+    name: 'SpladePropsInTemplateRender',
     template: spladeTemplates[props.spladeTemplateId],
     props: { spladeTemplateId: String },
-    data: () => ({ message }),
+    data: () => ({ title, updateTitle }),
 }
 </script>
 <template>

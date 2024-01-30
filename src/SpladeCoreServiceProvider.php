@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Js;
 use Illuminate\Support\Str;
-use Illuminate\View\Compilers\ComponentTagCompiler;
 use Illuminate\View\Component;
 use Illuminate\View\ComponentAttributeBag;
 use Illuminate\View\DynamicComponent;
@@ -71,13 +70,7 @@ class SpladeCoreServiceProvider extends PackageServiceProvider
     protected function registerComponentHelper()
     {
         $this->app->singleton(ComponentHelper::class, function () {
-            $bladeCompliler = $this->getBladeCompiler();
-
-            $componentTagCompiler = new ComponentTagCompiler(
-                $bladeCompliler->getClassComponentAliases(),
-                $bladeCompliler->getClassComponentNamespaces(),
-                $bladeCompliler
-            );
+            $componentTagCompiler = $this->getBladeCompiler()->makeComponentTagCompiler();
 
             return new ComponentHelper($componentTagCompiler, $this->app['files']);
         });

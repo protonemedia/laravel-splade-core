@@ -14,11 +14,17 @@ class DemoRoutesTest extends TestCase
             ['/blade-method-callbacks'],
             ['/blade-method'],
             ['/change-blade-prop'],
+            ['/component-import'],
             ['/dynamic'],
+            ['/dynamic-component-import'],
+            ['/emit'],
             ['/form'],
+            ['/props-in-template'],
             ['/refresh-state'],
             ['/refresh'],
             ['/regular-view'],
+            ['/slot'],
+            ['/to-vue-prop'],
             ['/two-way-binding'],
         ];
     }

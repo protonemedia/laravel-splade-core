@@ -1,5 +1,4 @@
 <script setup>
-import { GenericSpladeComponent } from '@protonemedia/laravel-splade-core'
 import { onMounted } from 'vue'
 const props = defineProps({ spladeBridge: Object, spladeTemplateId: String, modelValue: {} })
 const $refs = {}
@@ -19,14 +18,13 @@ onMounted(() => {
 })
 const spladeRender = {
     name: 'SpladeComponentDatePickerRender',
-    components: { GenericSpladeComponent },
     template: spladeTemplates[props.spladeTemplateId],
-    data: () => {
-        return { emit, setSpladeRef }
-    },
     props: { spladeBridge: Object, spladeTemplateId: String, modelValue: {} },
+    data: () => ({ emit, setSpladeRef }),
 }
 </script>
 <template>
-    <spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" :model-value="modelValue" />
+    <spladeRender :splade-bridge="spladeBridge" :splade-template-id="spladeTemplateId" :model-value="modelValue">
+        <template v-for="(_, slot) of $slots" #[slot]="scope"><slot :name="slot" v-bind="scope" /></template>
+    </spladeRender>
 </template>

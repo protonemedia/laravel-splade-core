@@ -472,10 +472,6 @@ JS;
             'dynamic' => Collection::make([]),
         ];
 
-        if (! $this->isComponent()) {
-            return $this->importedComponents;
-        }
-
         Collection::make($this->scriptParser->getImports())
             ->keys()
             ->each(function (string $import) {

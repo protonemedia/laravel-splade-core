@@ -522,7 +522,7 @@ JS : '';
 
         $components = Collection::make($importedComponents['static'])->implode(',');
 
-        $componentsObject = $this->isComponent() && $components ? <<<JS
+        $componentsObject = $components ? <<<JS
 components: { {$components} },
 JS : '';
 

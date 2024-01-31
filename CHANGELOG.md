@@ -2,6 +2,10 @@
 
 All notable changes to `splade-core` will be documented in this file.
 
+## 4.0.1 - 2024-01-31
+
+Added `putPluginOnWorkbench` method to Plugin Repository
+
 ## 4.0.0 - 2024-01-30
 
 ### What's Changed
@@ -84,6 +88,7 @@ public function dataFromMethod(): array
 {
     return ['foo', 'bar', 'baz'];
 }
+
 
 
 

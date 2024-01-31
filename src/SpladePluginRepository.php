@@ -18,6 +18,11 @@ class SpladePluginRepository
     private array $bladeComponents = [];
 
     /**
+     * @var SpladePluginProvider[]
+     */
+    private array $pluginsOnWorkbench = [];
+
+    /**
      * @var string[]
      */
     private array $componentsOnWorkbench = [];
@@ -47,6 +52,16 @@ class SpladePluginRepository
         $componentClass = is_string($component) ? $component : get_class($component);
 
         return array_key_exists($componentClass, $this->bladeComponents);
+    }
+
+    /**
+     * Put the given plugin on the workbench.
+     */
+    public function putPluginOnWorkbench(SpladePluginProvider $provider): void
+    {
+        $this->pluginsOnWorkbench[get_class($provider)] = $provider;
+
+        $this->putComponentsOnWorkbench($provider->getComponents());
     }
 
     /**
@@ -89,13 +104,16 @@ class SpladePluginRepository
 
     private function getJavascriptImports(): Collection
     {
-        return collect($this->plugins)->mapWithKeys(function (SpladePluginProvider $provider) {
-            $hash = 'S'.md5($provider->getLibraryBuildFilename());
+        return collect($this->plugins)
+            ->reject(fn (SpladePluginProvider $provider) => array_key_exists(get_class($provider), $this->pluginsOnWorkbench))
+            ->mapWithKeys(function (SpladePluginProvider $provider) {
 
-            $path = base_path('vendor/'.$provider->getComposerPackageName().'/dist/'.$provider->getLibraryBuildFilename());
+                $hash = 'S'.md5($provider->getLibraryBuildFilename());
 
-            return [$hash => "import {$hash} from '{$path}'"];
-        });
+                $path = base_path('vendor/'.$provider->getComposerPackageName().'/dist/'.$provider->getLibraryBuildFilename());
+
+                return [$hash => "import {$hash} from '{$path}'"];
+            });
     }
 
     /**

@@ -96,7 +96,7 @@ jobs:
         with:
           timeout_minutes: 5
           max_attempts: 3
-          command: cd app && php artisan dusk --stop-on-failure --stop-on-error
+          command: cd app && php artisan dusk
 
       - name: Upload Screenshots
         if: failure()

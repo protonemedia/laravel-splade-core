@@ -53,7 +53,15 @@ class ImportedVueComponent
 </{$this->name}>
 BLADE;
 
-        (new Filesystem)->ensureDirectoryExists($directory);
+        $filesystem = new Filesystem;
+        $filesystem->ensureDirectoryExists($directory);
+
+        $gitIgnore = $directory.'/.gitignore';
+
+        if (! $filesystem->exists($gitIgnore)) {
+            $filesystem->put($gitIgnore, "*\n!.gitignore\n");
+        }
+
         file_put_contents($path, $contents);
     }
 

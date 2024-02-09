@@ -498,10 +498,12 @@ JS;
             return $this->importedComponents;
         }
 
-        return $this->importedComponents = Collection::make($this->scriptParser->getImports())
-            ->map(function (string $from, string $import) {
-                if (Str::contains($this->viewWithoutScriptTag, "<{$import}")) {
-                    return new ImportedVueComponent($import, $from);
+        return $this->importedComponents = $this->scriptParser->getImports()
+            ->map(function (ImportedVueComponent $import) {
+                $name = $import->name;
+
+                if (Str::contains($this->viewWithoutScriptTag, "<{$name}")) {
+                    return $import;
                 }
 
                 // match anything in :is="" (e.g.: :is="true ? A : B") attribute
@@ -509,13 +511,14 @@ JS;
 
                 $isDynamic = Collection::make($matches[1] ?? [])
                     ->flatMap(fn (string $match) => explode(' ', $match))
-                    ->contains($import);
+                    ->contains($name);
 
                 if ($isDynamic) {
-                    return new ImportedVueComponent($import, $from, true);
+                    return $import->setDynamic();
                 }
             })
             ->filter()
+            ->sortByDesc(fn (ImportedVueComponent $component) => strlen($component->name))
             ->values();
     }
 

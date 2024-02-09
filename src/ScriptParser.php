@@ -210,23 +210,33 @@ class ScriptParser
 
     /**
      * Returns an array of all imports.
+     *
+     * @return Collection<ImportedVueComponent>
      */
-    public function getImports(): array
+    public function getImports(): Collection
     {
         $imports = [];
 
         // find ImportDeclaration
         foreach ($this->rootNode->query('ImportDeclaration') as $node) {
             /** @var ImportDeclaration $node */
-            $source = $node->getSource()->getValue();
+            $source = $node->getSource();
+
+            if (! $source instanceof StringLiteral) {
+                continue;
+            }
 
             // find ImportSpecifier
             foreach ($node->getSpecifiers() as $specifier) {
                 /** @var ImportSpecifier $specifier */
-                $imports[$specifier->getLocal()->getName()] = $source;
+                $imports[] = new ImportedVueComponent(
+                    $specifier->getLocal()->getName(),
+                    $source->getValue(),
+                    $source->getFormat() === StringLiteral::DOUBLE_QUOTED
+                );
             }
         }
 
-        return $imports;
+        return new Collection($imports);
     }
 }

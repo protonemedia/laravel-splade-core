@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use ProtoneMedia\SpladeCore\ImportedVueComponent;
 use ProtoneMedia\SpladeCore\ScriptParser;
 use Tests\TestCase;
 
@@ -203,6 +204,8 @@ JS;
             'DialogPanel' => '@headlessui/vue',
             'TransitionRoot' => '@headlessui/vue',
             'TransitionChild' => '@headlessui/vue',
-        ], $parser->getImports());
+        ], $parser->getImports()->mapWithKeys(function (ImportedVueComponent $import) {
+            return [$import->name => $import->module];
+        })->toArray());
     }
 }

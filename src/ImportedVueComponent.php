@@ -10,8 +10,16 @@ class ImportedVueComponent
     public function __construct(
         public string $name,
         public string $module,
+        public bool $double = false,
         public bool $dynamic = false,
     ) {
+    }
+
+    public function setDynamic(bool $dynamic = true): self
+    {
+        $this->dynamic = $dynamic;
+
+        return $this;
     }
 
     private function findViewPath($bladePath): string
@@ -33,9 +41,11 @@ class ImportedVueComponent
             return;
         }
 
+        $importName = $this->double ? "{{$this->name}}" : $this->name;
+
         $contents = <<<BLADE
 <script setup>
-    import {$this->name} from '{$this->module}';
+    import {$importName} from '{$this->module}';
 </script>
 
 <{$this->name}>

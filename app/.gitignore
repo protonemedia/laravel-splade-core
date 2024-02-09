@@ -19,3 +19,5 @@ yarn-error.log
 /.vscode
 /resources/js/splade/*
 !/resources/js/splade/*.gitignore
+/resources/views/components/splade/*
+!/resources/views/components/splade/*.gitignore

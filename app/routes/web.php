@@ -38,6 +38,7 @@ Route::view('/regular-view', 'regular-view');
 Route::view('/slot', 'slot');
 Route::view('/to-vue-prop', 'to-vue-prop');
 Route::view('/two-way-binding', 'two-way-binding');
+Route::view('/vue-component-in-slot', 'vue-component-in-slot');
 
 Route::get('/login', function () {
     return 'login!';

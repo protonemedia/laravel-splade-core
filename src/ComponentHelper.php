@@ -26,7 +26,7 @@ class ComponentHelper
     /**
      * Returns the view paths sorted by length.
      */
-    protected function getViewPaths(): array
+    public function getViewPaths(): array
     {
         if ($this->viewPaths) {
             return $this->viewPaths;

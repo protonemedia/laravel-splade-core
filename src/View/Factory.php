@@ -3,6 +3,7 @@
 namespace ProtoneMedia\SpladeCore\View;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Js;
 use Illuminate\Support\Str;
 use Illuminate\View\Component;
@@ -126,22 +127,24 @@ class Factory extends BaseFactory
         $templateId = $this->componentData[count($this->componentStack) + 1]['spladeBridge']['template_hash'] ?? null;
 
         $data['__laravel_slots'] = collect($data['__laravel_slots'] ?? [])
-            ->map(function (ComponentSlot $slot, $name) use ($templateId) {
+            ->mapWithKeys(function (ComponentSlot $slot, $name) use ($templateId) {
                 if ($slot->isEmpty()) {
                     return $slot;
                 }
 
-                $name = $name === '__default' ? 'default' : Str::kebab($name);
+                $hash = md5(Str::random());
 
-                $this->originalSlots[$name] = $slot;
+                $this->originalSlots[$hash] = clone $slot;
 
-                $vueSlot = '<slot name="'.$name.'"></slot>';
+                $vueSlot = '<slot name="'.$hash.'"></slot>';
 
-                return new ComponentSlot(
+                $componentSlot = new ComponentSlot(
                     static::$trackSpladeComponents
                         ? "<!--splade-template-id=\"{$templateId}\"-->{$vueSlot}"
                         : $vueSlot
                 );
+
+                return [$hash => $componentSlot];
             })
             ->all();
 
@@ -225,8 +228,6 @@ class Factory extends BaseFactory
         $this->pushSpladeTemplate($templateId, $output);
 
         $slotsHtml = collect($this->originalSlots)->map(function ($slot, $name) {
-            $name = $name === '__default' ? 'default' : Str::kebab($name);
-
             return "<template #{$name}>{$slot->toHtml()}</template>";
         })->implode("\n");
 

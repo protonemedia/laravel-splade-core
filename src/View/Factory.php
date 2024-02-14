@@ -12,6 +12,7 @@ use Illuminate\View\ComponentSlot;
 use Illuminate\View\Factory as BaseFactory;
 use ProtoneMedia\SpladeCore\AddSpladeToComponentData;
 use ProtoneMedia\SpladeCore\ResolveOnce;
+use ProtoneMedia\SpladeCore\View\ComponentSlot as CustomComponentSlot;
 
 class Factory extends BaseFactory
 {
@@ -120,39 +121,47 @@ class Factory extends BaseFactory
 
         $data = parent::componentData();
 
-        if (! array_key_exists('spladeBridge', $data)) {
-            return $data;
-        }
+        $templateId = $data['spladeBridge']['template_hash'] ?? null;
 
-        $templateId = $this->componentData[count($this->componentStack) + 1]['spladeBridge']['template_hash'] ?? null;
+        /** @var ComponentSlot|null */
+        $defaultSlot = $data['__laravel_slots']['__default'] ?? null;
+
+        if (! isset($data['__laravel_slots']['slot'])
+            && $defaultSlot?->toHtml() !== '###SPLADE-INJECT-HERE###'
+            && ! Str::startsWith($defaultSlot?->toHtml(), ['<generic-splade-component', '<!--splade-template-id='])
+        ) {
+            $data['__laravel_slots']['slot'] = $data['__laravel_slots']['__default'];
+            $data['__laravel_slots']['__default'] = new ComponentSlot;
+        }
 
         $data['__laravel_slots'] = collect($data['__laravel_slots'] ?? [])
             ->mapWithKeys(function (ComponentSlot $slot, $name) use ($templateId) {
-                if ($slot->isEmpty()) {
-                    return $slot;
-                }
-
-                $hash = md5(Str::random());
-
-                $this->originalSlots[$hash] = clone $slot;
-
-                $vueSlot = '<slot name="'.$hash.'"></slot>';
-
-                $componentSlot = new ComponentSlot(
-                    static::$trackSpladeComponents
-                        ? "<!--splade-template-id=\"{$templateId}\"-->{$vueSlot}"
-                        : $vueSlot
+                $slot = new CustomComponentSlot(
+                    $slot->toHtml(),
+                    $slot->attributes->getAttributes(),
+                    $hash = md5(Str::random(32))
                 );
 
-                return [$hash => $componentSlot];
+                $this->originalSlots[$name] = clone $slot;
+
+                if ($slot->isEmpty()) {
+                    return [$name => $slot];
+                }
+
+                $vueSlot = '<slot name="'.$slot->getHash().'" '.((string) $slot->attributes).'></slot>';
+
+                $componentSlot = new CustomComponentSlot(
+                    static::$trackSpladeComponents
+                        ? "<!--splade-template-id=\"{$templateId}\"-->{$vueSlot}"
+                        : $vueSlot,
+                    [], $hash
+                );
+
+                return [$name => $componentSlot];
             })
             ->all();
 
         foreach ($data['__laravel_slots'] as $name => $slot) {
-            if ($name === '__default') {
-                $name = 'slot';
-            }
-
             $data[$name] = $slot;
         }
 
@@ -228,7 +237,7 @@ class Factory extends BaseFactory
         $this->pushSpladeTemplate($templateId, $output);
 
         $slotsHtml = collect($this->originalSlots)->map(function ($slot, $name) {
-            return "<template #{$name}>{$slot->toHtml()}</template>";
+            return "<template #{$slot->getHash()}>{$slot->toHtml()}</template>";
         })->implode("\n");
 
         $genericComponent = "<generic-splade-component {$attrs} :bridge=\"{$spladeBridgeHtml}\">

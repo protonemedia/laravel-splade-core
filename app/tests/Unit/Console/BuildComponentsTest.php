@@ -18,10 +18,6 @@ class BuildComponentsTest extends TestCase
         $filesytem->ensureDirectoryExists(resource_path('js/splade'));
         $filesytem->put(resource_path('js/splade/.gitignore'), "*\n!.gitignore\n");
 
-        $filesytem->cleanDirectory(resource_path('views/components/splade'));
-        $filesytem->ensureDirectoryExists(resource_path('views/components/splade'));
-        $filesytem->put(resource_path('views/components/splade/.gitignore'), "*\n!.gitignore\n");
-
         $this->assertEquals(0, Artisan::call(BuildComponents::class));
 
         foreach ([

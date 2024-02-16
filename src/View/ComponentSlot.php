@@ -35,11 +35,11 @@ class ComponentSlot extends BaseComponentSlot
 
     private function getTemplateContents(): string
     {
-        return '<!--splade-template-'.$this->hash.'-->'.$this->contents.'</template>';
+        return '<!--splade-template-'.$this->hash.'-->'.$this->contents;
     }
 
     public function toVueTemplate(): string
     {
-        return '<template v-slot:'.$this->hash.'>'.$this->getTemplateContents().'</template>';
+        return '<template #'.$this->hash.'>'.$this->getTemplateContents().'</template>';
     }
 }

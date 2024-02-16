@@ -18,4 +18,28 @@ class ComponentSlot extends BaseComponentSlot
     {
         return $this->hash;
     }
+
+    public function replaceHtmlWithVueSlot(string $value): string
+    {
+        if (str_contains($value, $this->getTemplateContents())) {
+            return $value;
+        }
+
+        return str_replace($this->contents, $this->toVueSlot(), $value);
+    }
+
+    public function toVueSlot(): string
+    {
+        return '<slot name="'.$this->hash.'" '.((string) $this->attributes).'></slot>';
+    }
+
+    private function getTemplateContents(): string
+    {
+        return '<!--splade-template-'.$this->hash.'-->'.$this->contents.'</template>';
+    }
+
+    public function toVueTemplate(): string
+    {
+        return '<template v-slot:'.$this->hash.'>'.$this->getTemplateContents().'</template>';
+    }
 }

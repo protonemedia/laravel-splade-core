@@ -3,7 +3,7 @@
         const layoutCounter = ref(0)
     </script>
 
-    <p>Layout Counter: @{{ layoutCounter }}</p>
+    <p>This is the base view, rendering Root component (Base View Counter: @{{ layoutCounter }})</p>
 
     <x-root @incremented="layoutCounter++" />
 </x-layout>

@@ -114,7 +114,6 @@ class BladeViewExtractor
         $this->scriptParser->getImports();
 
         // Some pre-processing of the view.
-        $this->viewWithoutScriptTag = $this->replaceImportedVueComponentsWithBladeComponents($this->viewWithoutScriptTag);
         $this->viewWithoutScriptTag = $this->replaceComponentMethodLoadingStates($this->viewWithoutScriptTag);
         $this->viewWithoutScriptTag = $this->replaceElementRefs($this->viewWithoutScriptTag);
 
@@ -287,34 +286,6 @@ class BladeViewExtractor
             ->beforeLast($this->viewRootLayoutTags[1])
             ->trim()
             ->toString();
-    }
-
-    /**
-     * Replace someMethod.loading with someMethod.loading.value
-     */
-    protected function replaceImportedVueComponentsWithBladeComponents(string $script): string
-    {
-        if (str_contains($this->bladePath, 'splade/auto-generated')) {
-            return $script;
-        }
-
-        $components = $this->getImportedComponents();
-
-        if ($components->isEmpty()) {
-            return $script;
-        }
-
-        $components->reject->dynamic->each(function (ImportedVueComponent $staticComponent) use (&$script) {
-            $staticComponent->ensureBladeViewExists($this->bladePath);
-
-            $bladeComponentName = $staticComponent->getBladeTag();
-            // Replace <$component with <x-splade-generated-$component
-            $script = preg_replace("/<{$staticComponent->name}/", "<{$bladeComponentName}", $script);
-            // Replace </$component with </x-splade-generated-$component
-            $script = preg_replace("/<\/{$staticComponent->name}/", "</{$bladeComponentName}", $script);
-        });
-
-        return $script;
     }
 
     /**

@@ -7,6 +7,8 @@ A package to use Vue 3's Composition API in Laravel Blade.
 [![Splade Discord Server](https://dcbadge.vercel.app/api/server/qGJ4MkMQWm?style=flat&theme=default-inverted)](https://discord.gg/qGJ4MkMQWm)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/pascalbaljet)](https://github.com/sponsors/pascalbaljet)
 
+> :warning: This package is abandoned: [Thoughts on Splade: I took a week off to look around and reflect.](https://protone.media/en/blog/thoughts-on-splade-i-took-a-week-off-to-look-around-and-reflect)
+
 ## Sponsor Splade
 
 We sincerely value our community support in our endeavor to create and offer free Laravel packages. If you find our package beneficial and rely on it for your professional work, we kindly request your support in [sponsoring](https://github.com/sponsors/pascalbaljet) its maintenance and development. Managing issues and pull requests is a time-intensive task, and your assistance would be greatly appreciated. Thank you for considering our request! ❤️

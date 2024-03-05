@@ -11,7 +11,7 @@ function show() {
 <div>
     <button type="button" @click="show">Open Dialog</button>
 
-    <TransitionRoot :show="openend">
+    <TransitionRoot ::show="openend">
         <TransitionChild>
             <Dialog>
                 <DialogPanel>

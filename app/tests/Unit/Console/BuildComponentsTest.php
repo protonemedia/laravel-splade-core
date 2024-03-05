@@ -13,9 +13,10 @@ class BuildComponentsTest extends TestCase
     public function it_builds_the_components()
     {
         $filesytem = new Filesystem;
+
         $filesytem->cleanDirectory(resource_path('js/splade'));
         $filesytem->ensureDirectoryExists(resource_path('js/splade'));
-        $filesytem->put(resource_path('js/splade/.gitignore'), '');
+        $filesytem->put(resource_path('js/splade/.gitignore'), "*\n!.gitignore\n");
 
         $this->assertEquals(0, Artisan::call(BuildComponents::class));
 

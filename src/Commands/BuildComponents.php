@@ -27,6 +27,10 @@ class BuildComponents extends Command
         }
 
         foreach (config('view.paths') as $path) {
+            if (! $filesystem->exists($path)) {
+                continue;
+            }
+
             $this->info("Searching in {$path}");
 
             $files = $filesystem->allFiles($path);

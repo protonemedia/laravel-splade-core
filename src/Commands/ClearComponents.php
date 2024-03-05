@@ -14,6 +14,15 @@ class ClearComponents extends Command
 
     public function handle(Filesystem $filesystem): int
     {
+        $this->cleanCompiledScripts($filesystem);
+
+        $this->comment('Done!');
+
+        return self::SUCCESS;
+    }
+
+    private function cleanCompiledScripts(Filesystem $filesystem): void
+    {
         $directory = config('splade-core.compiled_scripts');
 
         $filesystem->ensureDirectoryExists($directory);
@@ -29,9 +38,5 @@ class ClearComponents extends Command
             $this->info("Removing {$script}");
             $filesystem->delete($script);
         }
-
-        $this->comment('Done!');
-
-        return self::SUCCESS;
     }
 }

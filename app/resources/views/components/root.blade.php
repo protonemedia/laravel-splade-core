@@ -9,15 +9,17 @@
     }
 </script>
 
-<h2>Parent component</h2>
-<p>Root Counter: @{{ rootCounter }}</p>
-
+<p>This is Root Component, rendering Child Component (Root Counter: @{{ rootCounter }})</p>
 <button @click="increment">Increment</button>
 
 <x-child>
-    <p>Root Counter from default slot: @{{ rootCounter }}</p>
+    <div style="background: #f3f3f3; padding: 15px;">
+        <p>Root Counter from default slot: @{{ rootCounter }}</p>
+    </div>
 
     <x-slot name="subslot">
-        <p>Root Counter from sub-slot: @{{ rootCounter }}</p>
+        <div style="background: #c3c3c3; padding: 15px;">
+            <p>Root Counter from sub-slot: @{{ rootCounter }}</p>
+        </div>
     </x-slot>
 </x-child>
